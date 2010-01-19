@@ -1,7 +1,7 @@
 //
 //	parser skeleton, CS 480, Winter 2006
 //	written by Tim Budd
-//		modified by:
+//		modified by: Richard Tracy
 //
 
 public class Parser {
