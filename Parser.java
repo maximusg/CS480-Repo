@@ -177,6 +177,10 @@ public class Parser {
 			
 		}else{
 			nameDeclaration();
+			while(lex.match(",")){
+				lex.nextLex();
+				nameDeclaration();
+			}
 		}
 		stop("argumentList");
 	}
@@ -297,13 +301,45 @@ public class Parser {
 	
 	private void ifStatement()throws ParseException{
 		start("ifStatement");
-		
+		if(lex.match("if")){
+			lex.nextLex();
+			expression();
+			lex.nextLex();
+			if(lex.match(")")){
+				
+			}else{
+				//throw exception for expecting )
+				throw new ParseException(0);				
+			}
+		}else{
+			//throw exception for expecting if
+			throw new ParseException(0);
+		}
 		stop("ifStatement");	
 	}
 	
 	private void whileStatement()throws ParseException{
 		start("whileStatement");
-		
+		if(lex.match("while")){
+			lex.nextLex();
+			if(lex.match("(")){
+				lex.nextLex();
+				expression();
+				if(lex.match(")")){
+					lex.nextLex();
+					statement();
+				}else{
+					//throw exception for expecting )
+					throw new ParseException(0);
+				}
+			}else{
+				//throw error for expecting (
+				throw new ParseException(0);
+			}
+		}else{
+			//throw parse exception for expecting while
+			throw new ParseException(0);
+		}
 		stop("whileStatement");	
 	}
 	
@@ -400,28 +436,40 @@ public class Parser {
 	private void relExpression()throws ParseException{
 		start("relExpression");
 		plusExpression();
-		
+		if((lex.match("<"))||(lex.match("<="))||(lex.match("!="))||(lex.match("=="))||(lex.match(">="))||(lex.match(">"))){
+			lex.nextLex();
+			plusExpression();
+		}
 		stop("relExpression");	
 	}
 	
 	private void plusExpression()throws ParseException{
 		start("plusExpression");
 		timesExpression();
-		
+		while((lex.match("+"))||(lex.match("-"))||(lex.match("<<"))){
+			timesExpression();
+			lex.nextLex();
+		}
 		stop("plusExpression");	
 	}
 	
 	private void timesExpression()throws ParseException{
 		start("timesExpression");
 		term();
-		
+		while((lex.match("*"))||(lex.match("/"))||(lex.match("%"))){
+			if((lex.match("*"))||(lex.match("/"))){
+				term();
+			}else if((lex.match("%"))){
+				//this is listed as taking two arguments, but not sure on exact syntax
+			}
+		}
 		
 		stop("timesExpression");	
 	}
 	
 	private void term()throws ParseException{
 		start("term");
-		lex.nextLex();
+		//lex.nextLex();
 		if(lex.match("(")){
 			lex.nextLex();
 			expression();
@@ -444,10 +492,12 @@ public class Parser {
 			term();
 			lex.nextLex();
 		}else if(lex.isIdentifier()){
-			lex.nextLex();
+			reference();
+			//lex.nextLex();
 			if(lex.match("(")){
-				parameterList();
 				lex.nextLex();
+				parameterList();
+				
 				if(lex.match(")")){
 					lex.nextLex();
 				}else{
@@ -457,15 +507,12 @@ public class Parser {
 			}
 		}else if(lex.match("&")){
 			lex.nextLex();
-			if(lex.isIdentifier()){
-				lex.nextLex();
-			}else{
-				throw new ParseException(0);
-				//throw error saying that identifier was expected
-			}
+			reference();
 		}else if(lex.match("const")){
 			constantDeclaration();
 			
+		}else if((lex.tokenCategory()==lex.stringToken)||(lex.tokenCategory()==lex.intToken)||(lex.tokenCategory()==lex.realToken)){
+			lex.nextLex();
 		}
 		stop("term");	
 	}
