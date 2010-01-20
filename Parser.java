@@ -295,6 +295,9 @@ public class Parser {
 			whileStatement();
 		}else if(lex.match("begin")){
 			compoundStatement();
+		}else{
+			//throw exception, not sure what type
+			throw new ParseException(0);
 		}
 		stop("statement");	
 	}
@@ -303,12 +306,25 @@ public class Parser {
 		start("ifStatement");
 		if(lex.match("if")){
 			lex.nextLex();
-			expression();
-			lex.nextLex();
-			if(lex.match(")")){
+			if(lex.match("(")){
+				lex.nextLex();
+				expression();
+				//lex.nextLex();
 				
+				if(lex.match(")")){
+					lex.nextLex();
+					statement();
+					if(lex.match("else")){
+						lex.nextLex();
+						statement();
+					}
+				}else{
+					//throw exception for expecting )
+					System.out.println("Throwing up in ifStatement for matching )\n");
+					throw new ParseException(0);				
+				}
 			}else{
-				//throw exception for expecting )
+				//throw exception for expecting (
 				throw new ParseException(0);				
 			}
 		}else{
@@ -330,10 +346,12 @@ public class Parser {
 					statement();
 				}else{
 					//throw exception for expecting )
+					System.out.println("whileStatement expecting )");
 					throw new ParseException(0);
 				}
 			}else{
 				//throw error for expecting (
+				System.out.println("whileStatement expecting (");
 				throw new ParseException(0);
 			}
 		}else{
@@ -382,6 +400,7 @@ public class Parser {
 		start("reference");
 		if(lex.isIdentifier()){
 			lex.nextLex();
+			
 			if(lex.match("^")){
 				lex.nextLex();
 			}else if(lex.match(".")){
@@ -447,8 +466,9 @@ public class Parser {
 		start("plusExpression");
 		timesExpression();
 		while((lex.match("+"))||(lex.match("-"))||(lex.match("<<"))){
-			timesExpression();
 			lex.nextLex();
+			timesExpression();
+			
 		}
 		stop("plusExpression");	
 	}
@@ -458,6 +478,7 @@ public class Parser {
 		term();
 		while((lex.match("*"))||(lex.match("/"))||(lex.match("%"))){
 			if((lex.match("*"))||(lex.match("/"))){
+				lex.nextLex();
 				term();
 			}else if((lex.match("%"))){
 				//this is listed as taking two arguments, but not sure on exact syntax
@@ -482,15 +503,15 @@ public class Parser {
 		}else if(lex.match("not")){
 			lex.nextLex();
 			term();
-			lex.nextLex();
+			//lex.nextLex();
 		}else if(lex.match("new")){
 			lex.nextLex();
 			type();
-			lex.nextLex();
+			//lex.nextLex();
 		}else if(lex.match("-")){
 			lex.nextLex();
 			term();
-			lex.nextLex();
+			//lex.nextLex();
 		}else if(lex.isIdentifier()){
 			reference();
 			//lex.nextLex();
