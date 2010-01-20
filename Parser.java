@@ -70,12 +70,15 @@ public class Parser {
 					//check for constant here
 					lex.nextLex();
 				}else{
+					throw new ParseException(0);
 					//throw error saying that = was expected
 				}
 			}else{
+				throw new ParseException(0);
 				//throw error saying that identifier was expected
 			}
 		}else{
+			throw new ParseException(0);
 			//throw error that const was expected.  We probably don't need this one
 		}
 		stop("constantDeclaration");
@@ -89,9 +92,11 @@ public class Parser {
 				lex.nextLex();
 				classBody();
 			}else{
+				throw new ParseException(0);
 				//throw error for expecting identifier
 			}
 		}else{
+			throw new ParseException(0);
 			//throw error for expecting class
 		}
 		stop("classDeclaration");
@@ -106,10 +111,12 @@ public class Parser {
 				if(lex.match(";")){
 					lex.nextLex();
 				}else{
+					throw new ParseException(0);
 					//throw error for expecting ;
 				}
 			}
 		}else{
+			throw new ParseException(0);
 			//throw error expecting begin
 		}
 		stop("classBody");
@@ -133,9 +140,11 @@ public class Parser {
 				returnType();
 				functionBody();
 			}else{
+				throw new ParseException(0);
 				//throw some type of error
 			}
 		}else{
+			throw new ParseException(0);
 			//throw some type of error
 		}
 		stop("functionDeclaration");
@@ -151,10 +160,12 @@ public class Parser {
 			if(lex.match(")")){
 				lex.nextLex();
 			}else{
+				throw new ParseException(0);
 				//throw an error that it was expecting )
 			}
 				
 		}else{
+			throw new ParseException(0);
 			//throw an error that it was expecting (
 		}
 		stop("arguments");
@@ -175,11 +186,14 @@ public class Parser {
 		if(lex.isIdentifier()){
 			lex.nextLex();
 			if(lex.match(":")){
+				lex.nextLex();
 				type();
 			}else{
+				throw new ParseException(0);
 				//throw error that it was expecting :
 			}
 		}else{
+			throw new ParseException(0);
 			//throw error that it is not an identifier
 		}
 		stop("nameDeclaration");	
@@ -200,14 +214,17 @@ public class Parser {
 					lex.nextLex();
 					if(lex.tokenCategory() == lex.intToken){
 						lex.nextLex();
-						type();
+						//type();
 					}else{
+						throw new ParseException(0);
 						//throw an error that it was expecting an integer token
 					}
 				}else{
+					throw new ParseException(0);
 					//throw an error that it was expecting a :
 				}
 			}else{
+				throw new ParseException(0);
 				//throw an error that it was expecting an integer token
 			}
 		}
@@ -227,13 +244,14 @@ public class Parser {
 		start("functionBody");
 		if(lex.match("begin")){
 			compoundStatement();
-			lex.nextLex();
+			//lex.nextLex();
 		}else{
 			nonClassDeclaration();
 			if(lex.match(";")){
 				lex.nextLex();
 				functionBody();
 			}else{
+				throw new ParseException(0);
 				//throw error that ; was expected
 			}
 		}
@@ -247,12 +265,15 @@ public class Parser {
 			while(!lex.match("end")){
 				statement();
 				if(!lex.match(";")){
+					throw new ParseException(0);
 					//throw exception that we were expecting a  ;
 				}else{
 					lex.nextLex();
 				}
 			}
+			lex.nextLex();
 		}else{
+			throw new ParseException(0);
 			//throw error that begin was expected
 		}
 		stop("compoundStatement");	
@@ -303,14 +324,19 @@ public class Parser {
 			}else if(lex.match(("("))){
 				lex.nextLex();
 				parameterList();
-				lex.nextLex();
-				if(!lex.match(")")){
+				//lex.nextLex();
+				if(lex.match(")")){
+					lex.nextLex();
+				}else{
+					throw new ParseException(0);
 					//throw error that ) was expected
 				}
 			}else{
+				throw new ParseException(0);
 				//throw error that = or ( was expected
 			}
 		}else{
+			throw new ParseException(0);
 			//throw error that identifier was expected
 		}
 		stop("assignOrFunction");	
@@ -327,6 +353,7 @@ public class Parser {
 				if(lex.isIdentifier()){
 					lex.nextLex();
 				}else{
+					throw new ParseException(0);
 					//throw error that identifier was expected
 				}
 			}else if(lex.match("[")){
@@ -335,10 +362,12 @@ public class Parser {
 				if(lex.match("]")){
 					lex.nextLex();
 				}else{
+					throw new ParseException(0);
 					//throw error that ] was expected
 				}
 			}
 		}else{
+			throw new ParseException(0);
 			//throw error that identifier was expected
 		}
 		stop("reference");	
@@ -399,6 +428,7 @@ public class Parser {
 			if(lex.match(")")){
 				lex.nextLex();
 			}else{
+				throw new ParseException(0);
 				//throw error that ) was expected
 			}
 		}else if(lex.match("not")){
@@ -421,6 +451,7 @@ public class Parser {
 				if(lex.match(")")){
 					lex.nextLex();
 				}else{
+					throw new ParseException(0);
 					//throw error that ) was expected
 				}
 			}
@@ -429,6 +460,7 @@ public class Parser {
 			if(lex.isIdentifier()){
 				lex.nextLex();
 			}else{
+				throw new ParseException(0);
 				//throw error saying that identifier was expected
 			}
 		}else if(lex.match("const")){
