@@ -1,7 +1,7 @@
 //
 //	parser skeleton, CS 480, Winter 2006
 //	written by Tim Budd
-//		modified by: Richard Tracy
+//		modified by: Richard Tracy, Brad Kessler
 //
 
 public class Parser {
@@ -45,8 +45,10 @@ public class Parser {
 	private void declaration(){
 		try{
 		start("declaration");
-			if(lex.match("function")){
+			if((lex.match("function"))||(lex.match("var"))||(lex.match("type"))||(lex.match("const"))){
 				nonClassDeclaration();
+			}else if((lex.match("class"))){
+				classDeclaration();
 			}else{
 				throw new ParseException(0); //this is not the correct error to throw and needs to be changed
 			}
@@ -58,8 +60,59 @@ public class Parser {
 
 	private void constantDeclaration()throws ParseException{
 		start("constantDeclaration");
-		
+		if(lex.match("const")){
+			lex.nextLex();
+			if(lex.isIdentifier()){
+				lex.nextLex();
+				if(lex.match("=")){
+					//need to put constant rules in here or a call to constant function
+					lex.nextLex();
+					//check for constant here
+					lex.nextLex();
+				}else{
+					//throw error saying that = was expected
+				}
+			}else{
+				//throw error saying that identifier was expected
+			}
+		}else{
+			//throw error that const was expected.  We probably don't need this one
+		}
 		stop("constantDeclaration");
+	}
+	
+	private void classDeclaration()throws ParseException{
+		start("classDeclaration");
+		if(lex.match("class")){
+			lex.nextLex();
+			if(lex.isIdentifier()){
+				lex.nextLex();
+				classBody();
+			}else{
+				//throw error for expecting identifier
+			}
+		}else{
+			//throw error for expecting class
+		}
+		stop("classDeclaration");
+	}
+	
+	private void classBody()throws ParseException{
+		start("classBody");
+		if(lex.match("begin")){
+			lex.nextLex();
+			while(!lex.match("end")){
+				nonClassDeclaration();
+				if(lex.match(";")){
+					lex.nextLex();
+				}else{
+					//throw error for expecting ;
+				}
+			}
+		}else{
+			//throw error expecting begin
+		}
+		stop("classBody");
 	}
 	
 	private void nonClassDeclaration()throws ParseException{
@@ -71,89 +124,317 @@ public class Parser {
 	}
 	
 	private void functionDeclaration()throws ParseException{
+		start("functionDeclaration");
+		if(lex.match("function")){
+			lex.nextLex();
+			if(lex.isIdentifier()){
+				lex.nextLex();
+				arguments();
+				returnType();
+				functionBody();
+			}else{
+				//throw some type of error
+			}
+		}else{
+			//throw some type of error
+		}
+		stop("functionDeclaration");
+		
+	}
+	
+	private void arguments()throws ParseException{
 		start("arguments");
+		//lex.nextLex();
 		if(lex.match("(")){
-			
+			lex.nextLex();
+			argumentList();
+			if(lex.match(")")){
+				lex.nextLex();
+			}else{
+				//throw an error that it was expecting )
+			}
+				
+		}else{
+			//throw an error that it was expecting (
 		}
 		stop("arguments");
-		
 	}
 	
 	private void argumentList()throws ParseException{
 		start("argumentList");
-		
+		if(lex.match(")")){
+			
+		}else{
+			nameDeclaration();
+		}
 		stop("argumentList");
+	}
+	
+	private void nameDeclaration()throws ParseException{
+		start("nameDeclaration");
+		if(lex.isIdentifier()){
+			lex.nextLex();
+			if(lex.match(":")){
+				type();
+			}else{
+				//throw error that it was expecting :
+			}
+		}else{
+			//throw error that it is not an identifier
+		}
+		stop("nameDeclaration");	
+	}
+	
+	private void type()throws ParseException{
+		start("type");
+		if(lex.isIdentifier()){
+			lex.nextLex();
+		}else if(lex.match("^")){
+			lex.nextLex();
+			type();
+		}else if(lex.match("[")){
+			lex.nextLex();
+			if(lex.tokenCategory() == lex.intToken){
+				lex.nextLex();
+				if(lex.match(":")){
+					lex.nextLex();
+					if(lex.tokenCategory() == lex.intToken){
+						lex.nextLex();
+						type();
+					}else{
+						//throw an error that it was expecting an integer token
+					}
+				}else{
+					//throw an error that it was expecting a :
+				}
+			}else{
+				//throw an error that it was expecting an integer token
+			}
+		}
+		stop("type");	
 	}
 	
 	private void returnType()throws ParseException{
 		start("returnType");
-		
+		if(lex.match(":")){
+			lex.nextLex();
+			type();
+		}
 		stop("returnType");	
 	}
 	
 	private void functionBody()throws ParseException{
 		start("functionBody");
-		
+		if(lex.match("begin")){
+			compoundStatement();
+			lex.nextLex();
+		}else{
+			nonClassDeclaration();
+			if(lex.match(";")){
+				lex.nextLex();
+				functionBody();
+			}else{
+				//throw error that ; was expected
+			}
+		}
 		stop("functionBody");	
 	}
 	
 	private void compoundStatement()throws ParseException{
 		start("compoundStatement");
-		
+		if(lex.match("begin")){
+			lex.nextLex();
+			while(!lex.match("end")){
+				statement();
+				if(!lex.match(";")){
+					//throw exception that we were expecting a  ;
+				}else{
+					lex.nextLex();
+				}
+			}
+		}else{
+			//throw error that begin was expected
+		}
 		stop("compoundStatement");	
 	}
 	
 	private void statement()throws ParseException{
 		start("statement");
-		
+		if(lex.match("return")){
+			returnStatement();
+		}else if(lex.isIdentifier()){
+			assignOrFunction();
+		}else if(lex.match("if")){
+			ifStatement();
+		}else if(lex.match("while")){
+			whileStatement();
+		}else if(lex.match("begin")){
+			compoundStatement();
+		}
 		stop("statement");	
+	}
+	
+	private void ifStatement()throws ParseException{
+		start("ifStatement");
+		
+		stop("ifStatement");	
+	}
+	
+	private void whileStatement()throws ParseException{
+		start("whileStatement");
+		
+		stop("whileStatement");	
+	}
+	
+	private void returnStatement()throws ParseException{
+		start("returnStatement");
+		
+		stop("returnStatement");	
 	}
 	
 	private void assignOrFunction()throws ParseException{
 		start("assignOrFunction");
-		
+		if(lex.isIdentifier()){
+			reference();
+			//lex.nextLex();
+			if(lex.match("=")){
+				lex.nextLex();
+				expression();
+			}else if(lex.match(("("))){
+				lex.nextLex();
+				parameterList();
+				lex.nextLex();
+				if(!lex.match(")")){
+					//throw error that ) was expected
+				}
+			}else{
+				//throw error that = or ( was expected
+			}
+		}else{
+			//throw error that identifier was expected
+		}
 		stop("assignOrFunction");	
 	}
 	
 	private void reference()throws ParseException{
 		start("reference");
-		
+		if(lex.isIdentifier()){
+			lex.nextLex();
+			if(lex.match("^")){
+				lex.nextLex();
+			}else if(lex.match(".")){
+				lex.nextLex();
+				if(lex.isIdentifier()){
+					lex.nextLex();
+				}else{
+					//throw error that identifier was expected
+				}
+			}else if(lex.match("[")){
+				lex.nextLex();
+				expression();
+				if(lex.match("]")){
+					lex.nextLex();
+				}else{
+					//throw error that ] was expected
+				}
+			}
+		}else{
+			//throw error that identifier was expected
+		}
 		stop("reference");	
 	}
 	
 	private void parameterList()throws ParseException{
 		start("parameterList");
-		
+		if(!lex.match(")")){
+			expression();
+			//lex.nextLex();
+			while(lex.match(",")){
+				lex.nextLex();
+				expression();
+				//lex.nextLex();
+			}
+		}
 		stop("parameterList");	
 	}
 	
 	private void expression()throws ParseException{
 		start("expression");
-		
+		relExpression();
+		while((lex.match("or"))||(lex.match("and"))){
+			lex.nextLex();
+			relExpression();
+		}
 		stop("expression");	
 	}
 	
 	private void relExpression()throws ParseException{
 		start("relExpression");
+		plusExpression();
 		
 		stop("relExpression");	
 	}
 	
 	private void plusExpression()throws ParseException{
 		start("plusExpression");
+		timesExpression();
 		
 		stop("plusExpression");	
 	}
 	
 	private void timesExpression()throws ParseException{
 		start("timesExpression");
+		term();
+		
 		
 		stop("timesExpression");	
 	}
 	
 	private void term()throws ParseException{
 		start("term");
-		
+		lex.nextLex();
+		if(lex.match("(")){
+			lex.nextLex();
+			expression();
+			if(lex.match(")")){
+				lex.nextLex();
+			}else{
+				//throw error that ) was expected
+			}
+		}else if(lex.match("not")){
+			lex.nextLex();
+			term();
+			lex.nextLex();
+		}else if(lex.match("new")){
+			lex.nextLex();
+			type();
+			lex.nextLex();
+		}else if(lex.match("-")){
+			lex.nextLex();
+			term();
+			lex.nextLex();
+		}else if(lex.isIdentifier()){
+			lex.nextLex();
+			if(lex.match("(")){
+				parameterList();
+				lex.nextLex();
+				if(lex.match(")")){
+					lex.nextLex();
+				}else{
+					//throw error that ) was expected
+				}
+			}
+		}else if(lex.match("&")){
+			lex.nextLex();
+			if(lex.isIdentifier()){
+				lex.nextLex();
+			}else{
+				//throw error saying that identifier was expected
+			}
+		}else if(lex.match("const")){
+			constantDeclaration();
+			
+		}
 		stop("term");	
 	}
 	
