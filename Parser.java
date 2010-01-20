@@ -1,7 +1,7 @@
 //
 //	parser skeleton, CS 480, Winter 2006
 //	written by Tim Budd
-//		modified by: Richard Tracy, Brad Kessler
+//		modified by: Richard Tracy, Brad Kessler, Sarah Clisby
 //
 
 public class Parser {
@@ -50,7 +50,7 @@ public class Parser {
 			}else if((lex.match("class"))){
 				classDeclaration();
 			}else{
-				throw new ParseException(0); //this is not the correct error to throw and needs to be changed
+				throw new ParseException(26); // This is the "expecting declaration" exception--is this correct?
 			}
 		stop("declaration");
 		}catch (ParseException e){
@@ -70,16 +70,13 @@ public class Parser {
 					//check for constant here
 					lex.nextLex();
 				}else{
-					throw new ParseException(0);
-					//throw error saying that = was expected
+					throw new ParseException(20); // Throws the "expecting assignment arrow" exception
 				}
 			}else{
-				throw new ParseException(0);
-				//throw error saying that identifier was expected
+				throw new ParseException(27); // Expecting identifier
 			}
 		}else{
-			throw new ParseException(0);
-			//throw error that const was expected.  We probably don't need this one
+			throw new ParseException(6); // Expecting const (We probably don't need this one)
 		}
 		stop("constantDeclaration");
 	}
@@ -92,12 +89,10 @@ public class Parser {
 				lex.nextLex();
 				classBody();
 			}else{
-				throw new ParseException(0);
-				//throw error for expecting identifier
+				throw new ParseException(27); // Expecting identifier
 			}
 		}else{
-			throw new ParseException(0);
-			//throw error for expecting class
+			throw new ParseException(5); // Expecting class
 		}
 		stop("classDeclaration");
 	}
@@ -111,13 +106,11 @@ public class Parser {
 				if(lex.match(";")){
 					lex.nextLex();
 				}else{
-					throw new ParseException(0);
-					//throw error for expecting ;
+					throw new ParseException(18); // Expecting semicolon
 				}
 			}
 		}else{
-			throw new ParseException(0);
-			//throw error expecting begin
+			throw new ParseException(4); // Expecting begin
 		}
 		stop("classBody");
 	}
@@ -128,7 +121,7 @@ public class Parser {
 			functionDeclaration();
 		}
 		stop("nonClassDeclaration");
-	}
+	} // This needs to check for var, type, and const as well, right?
 	
 	private void functionDeclaration()throws ParseException{
 		start("functionDeclaration");
@@ -140,12 +133,10 @@ public class Parser {
 				returnType();
 				functionBody();
 			}else{
-				throw new ParseException(0);
-				//throw some type of error
+				throw new ParseException(27); // Expecting identifier
 			}
 		}else{
-			throw new ParseException(0);
-			//throw some type of error
+			throw new ParseException(10); // Expecting keyword function
 		}
 		stop("functionDeclaration");
 		
@@ -160,13 +151,11 @@ public class Parser {
 			if(lex.match(")")){
 				lex.nextLex();
 			}else{
-				throw new ParseException(0);
-				//throw an error that it was expecting )
+				throw new ParseException(22); // Expecting right parenthesis
 			}
 				
 		}else{
-			throw new ParseException(0);
-			//throw an error that it was expecting (
+			throw new ParseException(21); // Expecting left parenthesis
 		}
 		stop("arguments");
 	}
@@ -193,12 +182,10 @@ public class Parser {
 				lex.nextLex();
 				type();
 			}else{
-				throw new ParseException(0);
-				//throw error that it was expecting :
+				throw new ParseException(19); // Expecting colon
 			}
 		}else{
-			throw new ParseException(0);
-			//throw error that it is not an identifier
+			throw new ParseException(27); // Expecting identifier
 		}
 		stop("nameDeclaration");	
 	}
@@ -220,16 +207,13 @@ public class Parser {
 						lex.nextLex();
 						//type();
 					}else{
-						throw new ParseException(0);
-						//throw an error that it was expecting an integer token
+						throw new ParseException(32); // Expecting integer constant
 					}
 				}else{
-					throw new ParseException(0);
-					//throw an error that it was expecting a :
+					throw new ParseException(19); // Expecting colon
 				}
 			}else{
-				throw new ParseException(0);
-				//throw an error that it was expecting an integer token
+				throw new ParseException(32); // Expecting integer constant
 			}
 		}
 		stop("type");	
@@ -255,8 +239,7 @@ public class Parser {
 				lex.nextLex();
 				functionBody();
 			}else{
-				throw new ParseException(0);
-				//throw error that ; was expected
+				throw new ParseException(18); // Expecting semicolon
 			}
 		}
 		stop("functionBody");	
@@ -269,16 +252,14 @@ public class Parser {
 			while(!lex.match("end")){
 				statement();
 				if(!lex.match(";")){
-					throw new ParseException(0);
-					//throw exception that we were expecting a  ;
+					throw new ParseException(18); // Expecting semicolon
 				}else{
 					lex.nextLex();
 				}
 			}
 			lex.nextLex();
 		}else{
-			throw new ParseException(0);
-			//throw error that begin was expected
+			throw new ParseException(4); // Expecting keyword begin
 		}
 		stop("compoundStatement");	
 	}
@@ -319,17 +300,14 @@ public class Parser {
 						statement();
 					}
 				}else{
-					//throw exception for expecting )
 					System.out.println("Throwing up in ifStatement for matching )\n");
-					throw new ParseException(0);				
+					throw new ParseException(22); // Expecting right parenthesis			
 				}
 			}else{
-				//throw exception for expecting (
-				throw new ParseException(0);				
+				throw new ParseException(21); // Expecting left parenthesis				
 			}
 		}else{
-			//throw exception for expecting if
-			throw new ParseException(0);
+			throw new ParseException(11); // Expecting keyword if
 		}
 		stop("ifStatement");	
 	}
@@ -345,18 +323,15 @@ public class Parser {
 					lex.nextLex();
 					statement();
 				}else{
-					//throw exception for expecting )
 					System.out.println("whileStatement expecting )");
-					throw new ParseException(0);
+					throw new ParseException(22); // Expecting right parenthesis
 				}
 			}else{
-				//throw error for expecting (
 				System.out.println("whileStatement expecting (");
-				throw new ParseException(0);
+				throw new ParseException(21); // Expecting left parenthesis
 			}
 		}else{
-			//throw parse exception for expecting while
-			throw new ParseException(0);
+			throw new ParseException(16); // Expecting keyword while
 		}
 		stop("whileStatement");	
 	}
@@ -382,16 +357,13 @@ public class Parser {
 				if(lex.match(")")){
 					lex.nextLex();
 				}else{
-					throw new ParseException(0);
-					//throw error that ) was expected
+					throw new ParseException(22); // Expecting right parenthesis
 				}
 			}else{
-				throw new ParseException(0);
-				//throw error that = or ( was expected
+				throw new ParseException(21); // Expecting left parenthesis
 			}
 		}else{
-			throw new ParseException(0);
-			//throw error that identifier was expected
+			throw new ParseException(27); // Expecting identifier
 		}
 		stop("assignOrFunction");	
 	}
@@ -408,8 +380,7 @@ public class Parser {
 				if(lex.isIdentifier()){
 					lex.nextLex();
 				}else{
-					throw new ParseException(0);
-					//throw error that identifier was expected
+					throw new ParseException(27); // Expecting identifier
 				}
 			}else if(lex.match("[")){
 				lex.nextLex();
@@ -417,13 +388,11 @@ public class Parser {
 				if(lex.match("]")){
 					lex.nextLex();
 				}else{
-					throw new ParseException(0);
-					//throw error that ] was expected
+					throw new ParseException(24); // Expecting right bracket
 				}
 			}
 		}else{
-			throw new ParseException(0);
-			//throw error that identifier was expected
+			throw new ParseException(27); // Expecting identifier
 		}
 		stop("reference");	
 	}
@@ -497,8 +466,7 @@ public class Parser {
 			if(lex.match(")")){
 				lex.nextLex();
 			}else{
-				throw new ParseException(0);
-				//throw error that ) was expected
+				throw new ParseException(22); // Expecting right parenthesis
 			}
 		}else if(lex.match("not")){
 			lex.nextLex();
@@ -522,8 +490,7 @@ public class Parser {
 				if(lex.match(")")){
 					lex.nextLex();
 				}else{
-					throw new ParseException(0);
-					//throw error that ) was expected
+					throw new ParseException(22); // Expecting right parenthesis
 				}
 			}
 		}else if(lex.match("&")){
