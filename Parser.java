@@ -66,13 +66,13 @@ public class Parser {
 					//check for constant here
 					lex.nextLex();
 				}else{
-					throw new ParseException(20); // Throws the "expecting assignment arrow" exception
+					throw new ParseException(20); // Expecting assignment arrow
 				}
 			}else{
 				throw new ParseException(27); // Expecting identifier
 			}
 		}else{
-			throw new ParseException(6); // Expecting const (We probably don't need this one)
+			throw new ParseException(6); // Expecting keyword const
 		}
 		stop("constantDeclaration");
 	}
@@ -88,7 +88,7 @@ public class Parser {
 				throw new ParseException(27); // Expecting identifier
 			}
 		}else{
-			throw new ParseException(5); // Expecting class
+			throw new ParseException(5); // Expecting keyword class
 		}
 		stop("classDeclaration");
 	}
@@ -106,7 +106,7 @@ public class Parser {
 				}
 			}
 		}else{
-			throw new ParseException(4); // Expecting begin
+			throw new ParseException(4); // Expecting keyword begin
 		}
 		stop("classBody");
 	}
@@ -115,9 +115,11 @@ public class Parser {
 		start("nonClassDeclaration");
 		if(lex.match("function")){
 			functionDeclaration();
+		} else if (lex.match("var") || lex.match("const") || lex.match("type")){
+			nonFunctionDeclaration();
 		}
 		stop("nonClassDeclaration");
-	} // This needs to check for var, type, and const as well, right?
+	} // This needs to throw an exception, but which one?
 	
 	private void functionDeclaration()throws ParseException{
 		start("functionDeclaration");
