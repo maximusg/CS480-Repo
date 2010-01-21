@@ -43,19 +43,15 @@ public class Parser {
 	}
 
 	private void declaration(){
-		try{
 		start("declaration");
-			if((lex.match("function"))||(lex.match("var"))||(lex.match("type"))||(lex.match("const"))){
-				nonClassDeclaration();
-			}else if((lex.match("class"))){
-				classDeclaration();
-			}else{
-				throw new ParseException(26); // This is the "expecting declaration" exception--is this correct?
-			}
-		stop("declaration");
-		}catch (ParseException e){
-			
+		if((lex.match("function"))||(lex.match("var"))||(lex.match("type"))||(lex.match("const"))){
+			nonClassDeclaration();
+		}else if((lex.match("class"))){
+			classDeclaration();
+		}else{
+			throw new ParseException(26); // Expecting declaration -- is this correct?
 		}
+		stop("declaration");		
 	}
 
 	private void constantDeclaration()throws ParseException{
