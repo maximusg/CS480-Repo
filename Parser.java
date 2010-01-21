@@ -261,7 +261,12 @@ public class Parser {
 					lex.nextLex();
 					if(lex.tokenCategory() == lex.intToken){
 						lex.nextLex();
-						//type();
+						if(lex.match("]")){
+							lex.nextLex();
+							type();
+						}else{
+							throw new ParseException(0); // Expecting int 
+						}
 					}else{
 						throw new ParseException(32); // Expecting integer constant
 					}
