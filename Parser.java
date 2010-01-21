@@ -68,7 +68,7 @@ public class Parser {
 					//need to put constant rules in here or a call to constant function
 					lex.nextLex();
 					//check for constant here
-					lex.nextLex();
+					
 				}else{
 					throw new ParseException(0);
 					//throw error saying that = was expected
@@ -126,8 +126,52 @@ public class Parser {
 		start("nonClassDeclaration");
 		if(lex.match("function")){
 			functionDeclaration();
+		}else if((lex.match("var"))||(lex.match("const"))||(lex.match("type"))){
+			nonFunctionDeclaration();
 		}
 		stop("nonClassDeclaration");
+	}
+	
+	private void nonFunctionDeclaration()throws ParseException{
+		start("nonfunctionDeclaration");
+		if(lex.match("var")){
+			variableDeclaration();
+		}else if(lex.match("type")){
+			typeDeclaration();
+		}else if(lex.match("const")){
+			constantDeclaration();
+		}else{
+			throw new ParseException(0);
+			//throw some type of error
+		}
+		stop("nonfunctionDeclaration");
+		
+	}
+	
+	private void typeDeclaration()throws ParseException{
+		start("typeDeclaration");
+		if(lex.match("type")){
+			lex.nextLex();
+			nameDeclaration();
+		}else{
+			throw new ParseException(0);
+			//throw error that we are expecting type
+		}
+		stop("typeDeclaration");
+		
+	}
+	
+	private void variableDeclaration()throws ParseException{
+		start("variableDeclaration");
+		if(lex.match("var")){
+			lex.nextLex();
+			nameDeclaration();
+		}else{
+			throw new ParseException(0);
+			//throw error that we are expecting var
+		}
+		stop("variableDeclaration");
+		
 	}
 	
 	private void functionDeclaration()throws ParseException{
@@ -246,19 +290,19 @@ public class Parser {
 	
 	private void functionBody()throws ParseException{
 		start("functionBody");
-		if(lex.match("begin")){
-			compoundStatement();
-			//lex.nextLex();
-		}else{
+		while(!lex.match("begin")){
 			nonClassDeclaration();
+			//lex.nextLex();	
 			if(lex.match(";")){
 				lex.nextLex();
-				functionBody();
 			}else{
-				throw new ParseException(0);
-				//throw error that ; was expected
+				System.out.println("Exception in functionBody");
+				//throw error for expecting ;
+				throw new ParseException(0);	
 			}
 		}
+		compoundStatement();
+
 		stop("functionBody");	
 	}
 	
@@ -363,7 +407,24 @@ public class Parser {
 	
 	private void returnStatement()throws ParseException{
 		start("returnStatement");
-		
+		if(lex.match("return")){
+			lex.nextLex();
+			if(lex.match("(")){
+				lex.nextLex();
+				expression();
+				//lex.nextLex();
+				if(!lex.match(")")){
+					System.out.println("In returnStatement expecting a )");
+					throw new ParseException(0);
+					//throw error that return was expected		
+				}else{
+					lex.nextLex();
+				}
+			}
+		}else{
+			throw new ParseException(0);
+			//throw error that return was expected	
+		}
 		stop("returnStatement");	
 	}
 	
