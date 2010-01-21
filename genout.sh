@@ -1,4 +1,4 @@
-#! /usr/bin/sh
+#! /bin/sh
 
 java Asgn2 test1 > test1.o
 java Asgn2 test2 > test2.o

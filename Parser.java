@@ -1,7 +1,7 @@
 //
 //	parser skeleton, CS 480, Winter 2006
 //	written by Tim Budd
-//		modified by: Richard Tracy, Brad Kessler, Sarah Clisby
+//		modified by: Richard Tracy, Brad Kessler, Sarah Clisby, Max Geiszler
 //
 
 public class Parser {
@@ -42,29 +42,20 @@ public class Parser {
 		stop("program");
 	}
 
-	private void declaration(){
+	private void declaration() throws ParseException{
 		start("declaration");
 		if((lex.match("function"))||(lex.match("var"))||(lex.match("type"))||(lex.match("const"))){
-			try {
+			
 				nonClassDeclaration();
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 		}else if((lex.match("class"))){
-			try {
+			
 				classDeclaration();
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 		}else{
-			try {
+			
 				throw new ParseException(26);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} // Expecting declaration -- is this correct?
+			
 		}
 		stop("declaration");		
 	}
@@ -120,6 +111,7 @@ public class Parser {
 					throw new ParseException(18); // Expecting semicolon
 				}
 			}
+			lex.nextLex();
 		}else{
 			throw new ParseException(4); // Expecting keyword begin
 		}
@@ -133,12 +125,14 @@ public class Parser {
 
 		}else if((lex.match("var"))||(lex.match("const"))||(lex.match("type"))){
 			nonFunctionDeclaration();
+		}else{
+			throw new ParseException(26);
 		}
 		stop("nonClassDeclaration");
 	} // This needs to throw an exception, but which one?
 	
 	private void nonFunctionDeclaration()throws ParseException{
-		start("nonfunctionDeclaration");
+		start("nonFunctionDeclaration");
 		if(lex.match("var")){
 			variableDeclaration();
 		}else if(lex.match("type")){
@@ -146,10 +140,10 @@ public class Parser {
 		}else if(lex.match("const")){
 			constantDeclaration();
 		}else{
-			throw new ParseException(0);
+			throw new ParseException(26);
 			//throw some type of error
 		}
-		stop("nonfunctionDeclaration");
+		stop("nonFunctionDeclaration");
 		
 	}
 	
@@ -159,7 +153,7 @@ public class Parser {
 			lex.nextLex();
 			nameDeclaration();
 		}else{
-			throw new ParseException(0);
+			throw new ParseException(14);
 			//throw error that we are expecting type
 		}
 		stop("typeDeclaration");
@@ -172,7 +166,7 @@ public class Parser {
 			lex.nextLex();
 			nameDeclaration();
 		}else{
-			throw new ParseException(0);
+			throw new ParseException(15);
 			//throw error that we are expecting var
 		}
 		stop("variableDeclaration");
@@ -265,7 +259,7 @@ public class Parser {
 							lex.nextLex();
 							type();
 						}else{
-							throw new ParseException(0); // Expecting int 
+							throw new ParseException(32); // Expecting int 
 						}
 					}else{
 						throw new ParseException(32); // Expecting integer constant
@@ -276,6 +270,8 @@ public class Parser {
 			}else{
 				throw new ParseException(32); // Expecting integer constant
 			}
+		}else{
+			throw new ParseException(30); // Expecting type
 		}
 		stop("type");	
 	}
@@ -340,7 +336,7 @@ public class Parser {
 			compoundStatement();
 		}else{
 			//throw exception, not sure what type
-			throw new ParseException(0);
+			throw new ParseException(34);
 		}
 		stop("statement");	
 	}
@@ -362,7 +358,6 @@ public class Parser {
 						statement();
 					}
 				}else{
-					System.out.println("Throwing up in ifStatement for matching )\n");
 					throw new ParseException(22); // Expecting right parenthesis			
 				}
 			}else{
@@ -385,11 +380,9 @@ public class Parser {
 					lex.nextLex();
 					statement();
 				}else{
-					System.out.println("whileStatement expecting )");
 					throw new ParseException(22); // Expecting right parenthesis
 				}
 			}else{
-				System.out.println("whileStatement expecting (");
 				throw new ParseException(21); // Expecting left parenthesis
 			}
 		}else{
@@ -407,15 +400,14 @@ public class Parser {
 				expression();
 				//lex.nextLex();
 				if(!lex.match(")")){
-					System.out.println("In returnStatement expecting a )");
-					throw new ParseException(0);
-					//throw error that return was expected		
+					throw new ParseException(22);
+							
 				}else{
 					lex.nextLex();
 				}
 			}
 		}else{
-			throw new ParseException(0);
+			throw new ParseException(12);
 			//throw error that return was expected	
 		}
 		stop("returnStatement");	
@@ -580,6 +572,9 @@ public class Parser {
 			
 		}else if((lex.tokenCategory()==lex.stringToken)||(lex.tokenCategory()==lex.intToken)||(lex.tokenCategory()==lex.realToken)){
 			lex.nextLex();
+		}else{
+			//needs to throw error for expecting expression
+			throw new ParseException(33); 
 		}
 		stop("term");	
 	}
