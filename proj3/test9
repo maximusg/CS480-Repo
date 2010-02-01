@@ -1,0 +1,4 @@
+function foo (a : int, a : real)
+begin
+	a = 8;
+end;

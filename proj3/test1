@@ -1,0 +1,12 @@
+var x : int;
+
+class barn
+begin
+   var y : int;
+end;
+
+function main()
+var cow : barn;
+begin
+   cow.x = 7;
+end;

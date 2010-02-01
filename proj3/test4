@@ -1,0 +1,7 @@
+type a : [ 2 : 4 ] int;
+var b : a;
+function main ()
+var c : a;
+begin
+	c[3] = 7;
+end;

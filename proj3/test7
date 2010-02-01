@@ -1,0 +1,9 @@
+function main ()
+var ptr : ^ int;
+var n : int;
+begin
+	n = 42;
+	ptr = & n;
+	printInt (ptr ^);
+end;
+

@@ -1,0 +1,7 @@
+
+function main()
+  const PI = 3.14159;
+  var x : real;
+begin
+   x = PI;
+end;
