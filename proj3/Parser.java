@@ -7,15 +7,17 @@
 public class Parser {
 	private Lexer lex;
 	private boolean debug;
-	SymbolTable sym = new GlobalSymbolTable();
+	
 	
 	public Parser (Lexer l, boolean d) { lex = l; debug = d; }
 
 	public void parse () throws ParseException {
+		SymbolTable sym = new GlobalSymbolTable();
 		lex.nextLex();
 		
 		sym.enterType("int", PrimitiveType.IntegerType);
 		sym.enterType("real", PrimitiveType.RealType);
+
 		sym.enterFunction("printInt", new FunctionType(PrimitiveType.VoidType));
 		sym.enterFunction("printReal", new FunctionType(PrimitiveType.VoidType));
 		sym.enterFunction("printStr", new FunctionType(PrimitiveType.VoidType));
@@ -122,8 +124,10 @@ public class Parser {
 		start("typeDeclaration");
 		if (lex.match("type")) {
 			lex.nextLex();
+			String s = lex.tokenText();
 			Type result = nameDeclaration(sym);
-			sym.enterType (lex.tokenText(), result );
+			sym.enterType (s, result );
+			lex.nextLex();
 		} else
 			parseError(14); 
 		stop("typeDeclaration");
@@ -133,7 +137,9 @@ public class Parser {
 		start("variableDeclaration");
 		if (lex.match("var")) {
 			lex.nextLex();
-			nameDeclaration(sym);
+			String s = lex.tokenText();
+			Type t = nameDeclaration(sym);
+			sym.enterVariable(s,t);
 			}
 		else
 			parseError(15);
@@ -258,6 +264,7 @@ public class Parser {
 			if (! lex.match("]"))
 				parseError(24);
 			lex.nextLex();
+			result = sym.lookupType(lex.tokenText());
 			result = new ArrayType(lower, upper, result);
 			}
 		else
