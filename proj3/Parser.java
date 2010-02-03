@@ -7,12 +7,13 @@
 public class Parser {
 	private Lexer lex;
 	private boolean debug;
-
+	SymbolTable sym = new GlobalSymbolTable();
+	
 	public Parser (Lexer l, boolean d) { lex = l; debug = d; }
 
 	public void parse () throws ParseException {
 		lex.nextLex();
-		SymbolTable sym = new SymbolTable();
+		
 		program(sym);
 		if (lex.tokenCategory() != lex.endOfInput)
 			parseError(3); // expecting end of file
