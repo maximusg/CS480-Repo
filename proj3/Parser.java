@@ -10,8 +10,9 @@ public class Parser {
 
 	public Parser (Lexer l, boolean d) { lex = l; debug = d; }
 
-	public void parse (SymbolTable sym) throws ParseException {
+	public void parse () throws ParseException {
 		lex.nextLex();
+		SymbolTable sym = new SymbolTable();
 		program(sym);
 		if (lex.tokenCategory() != lex.endOfInput)
 			parseError(3); // expecting end of file
