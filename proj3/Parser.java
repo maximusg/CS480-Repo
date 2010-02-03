@@ -121,7 +121,8 @@ public class Parser {
 		start("typeDeclaration");
 		if (lex.match("type")) {
 			lex.nextLex();
-			nameDeclaration(sym);
+			Type result = nameDeclaration(sym);
+			sym.enterType (lex.tokenText(), result );
 		} else
 			parseError(14); 
 		stop("typeDeclaration");
@@ -138,7 +139,7 @@ public class Parser {
 		stop("variableDeclaration");
 		}
 
-	private void nameDeclaration (SymbolTable sym) throws ParseException {
+	private Type nameDeclaration (SymbolTable sym) throws ParseException {
 		start("nameDeclaration");
 		if (! lex.isIdentifier()) 
 			parseError(27);
@@ -146,8 +147,10 @@ public class Parser {
 		if (! lex.match(":"))
 			parseError(19);
 		lex.nextLex();
-		type(sym);
+		Type result = type(sym);
 		stop("nameDeclaration");
+		return result;
+		
 		}
 
 	private void classDeclaration(SymbolTable sym) throws ParseException {
