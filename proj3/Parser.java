@@ -93,13 +93,16 @@ public class Parser {
 			if (! lex.match("="))
 				parseError(20);
 			lex.nextLex();
-			if (lex.tokenCategory() == lex.intToken)
-				;
-			else if (lex.tokenCategory() == lex.realToken)
-				;
-			else if (lex.tokenCategory() == lex.stringToken)
-				;
-			else
+			if (lex.tokenCategory() == lex.intToken){
+				Ast intVar = new IntegerNode(new Integer(lex.tokenText()));
+				sym.enterConstant(lex.tokenText(), intVar);
+			}else if (lex.tokenCategory() == lex.realToken){
+				Ast realVar = new RealNode(new Double(lex.tokenText()));
+				sym.enterConstant(lex.tokenText(), realVar);
+			}else if (lex.tokenCategory() == lex.stringToken){
+				Ast stringVar = new StringNode(lex.tokenText());
+				sym.enterConstant(lex.tokenText(), stringVar);
+			}else
 				parseError(31);
 			lex.nextLex();
 			}
