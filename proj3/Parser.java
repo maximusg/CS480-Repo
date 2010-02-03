@@ -14,6 +14,12 @@ public class Parser {
 	public void parse () throws ParseException {
 		lex.nextLex();
 		
+		sym.enterType("int", PrimitiveType.IntegerType);
+		sym.enterType("real", PrimitiveType.RealType);
+		sym.enterFunction("printInt", new FunctionType(PrimitiveType.VoidType));
+		sym.enterFunction("printReal", new FunctionType(PrimitiveType.VoidType));
+		sym.enterFunction("printStr", new FunctionType(PrimitiveType.VoidType));
+		
 		program(sym);
 		if (lex.tokenCategory() != lex.endOfInput)
 			parseError(3); // expecting end of file
