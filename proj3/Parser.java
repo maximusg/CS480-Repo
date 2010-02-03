@@ -7,12 +7,20 @@
 public class Parser {
 	private Lexer lex;
 	private boolean debug;
-
+	SymbolTable sym = new GlobalSymbolTable();
+	
 	public Parser (Lexer l, boolean d) { lex = l; debug = d; }
 
 	public void parse () throws ParseException {
 		lex.nextLex();
-		program();
+		
+		sym.enterType("int", PrimitiveType.IntegerType);
+		sym.enterType("real", PrimitiveType.RealType);
+		sym.enterFunction("printInt", new FunctionType(PrimitiveType.VoidType));
+		sym.enterFunction("printReal", new FunctionType(PrimitiveType.VoidType));
+		sym.enterFunction("printStr", new FunctionType(PrimitiveType.VoidType));
+		
+		program(sym);
 		if (lex.tokenCategory() != lex.endOfInput)
 			parseError(3); // expecting end of file
 	}
@@ -31,11 +39,11 @@ public class Parser {
 		throw new ParseException(number);
 	}
 
-	private void program () throws ParseException {
+	private void program (SymbolTable sym) throws ParseException {
 		start("program");
 
 		while (lex.tokenCategory() != Lexer.endOfInput) {
-			declaration();
+			declaration(sym);
 			if (lex.match(";"))
 				lex.nextLex();
 			else
@@ -44,44 +52,44 @@ public class Parser {
 		stop("program");
 	}
 
-	private void declaration () throws ParseException {
+	private void declaration (SymbolTable sym) throws ParseException {
 		start("declaration");
 		if (lex.match("class"))
-			classDeclaration();
+			classDeclaration(sym);
 		else if (lex.match("function") || lex.match("const") 
 			|| lex.match("var") || lex.match("type"))
-			nonClassDeclaration();
+			nonClassDeclaration(sym);
 		else 
 			parseError(26);
 		stop("declaration");
 		}
 
-	private void nonClassDeclaration () throws ParseException {
+	private void nonClassDeclaration (SymbolTable sym) throws ParseException {
 		start("nonClassDeclaration");
 		if (lex.match("function"))
-			functionDeclaration();
+			functionDeclaration(sym);
 		else if (lex.match("const") || lex.match("var") 
 				|| lex.match("type"))
-			nonFunctionDeclaration();
+			nonFunctionDeclaration(sym);
 		else
 			parseError(26);
 		stop("nonClassDeclaration");
 		}
 
-	private void nonFunctionDeclaration () throws ParseException {
+	private void nonFunctionDeclaration (SymbolTable sym) throws ParseException {
 		start("nonFunctionDeclaration");
 		if (lex.match("var"))
-			variableDeclaration();
+			variableDeclaration(sym);
 		else if (lex.match("const"))
-			constantDeclaration();
+			constantDeclaration(sym);
 		else if (lex.match("type"))
-			typeDeclaration();
+			typeDeclaration(sym);
 		else 
 			parseError(26);
 		stop("nonFunctionDeclaration");
 		}
 
-	private void constantDeclaration () throws ParseException {
+	private void constantDeclaration (SymbolTable sym) throws ParseException {
 		start("constantDeclaration");
 		if (lex.match("const")) {
 			lex.nextLex();
@@ -91,13 +99,16 @@ public class Parser {
 			if (! lex.match("="))
 				parseError(20);
 			lex.nextLex();
-			if (lex.tokenCategory() == lex.intToken)
-				;
-			else if (lex.tokenCategory() == lex.realToken)
-				;
-			else if (lex.tokenCategory() == lex.stringToken)
-				;
-			else
+			if (lex.tokenCategory() == lex.intToken){
+				Ast intVar = new IntegerNode(new Integer(lex.tokenText()));
+				sym.enterConstant(lex.tokenText(), intVar);
+			}else if (lex.tokenCategory() == lex.realToken){
+				Ast realVar = new RealNode(new Double(lex.tokenText()));
+				sym.enterConstant(lex.tokenText(), realVar);
+			}else if (lex.tokenCategory() == lex.stringToken){
+				Ast stringVar = new StringNode(lex.tokenText());
+				sym.enterConstant(lex.tokenText(), stringVar);
+			}else
 				parseError(31);
 			lex.nextLex();
 			}
@@ -106,28 +117,28 @@ public class Parser {
 		stop("constantDeclaration");
 		}
 
-	private void typeDeclaration () throws ParseException {
+	private void typeDeclaration (SymbolTable sym) throws ParseException {
 		start("typeDeclaration");
 		if (lex.match("type")) {
 			lex.nextLex();
-			nameDeclaration();
+			nameDeclaration(sym);
 		} else
 			parseError(14); 
 		stop("typeDeclaration");
 	}
 
-	private void variableDeclaration () throws ParseException {
+	private void variableDeclaration (SymbolTable sym) throws ParseException {
 		start("variableDeclaration");
 		if (lex.match("var")) {
 			lex.nextLex();
-			nameDeclaration();
+			nameDeclaration(sym);
 			}
 		else
 			parseError(15);
 		stop("variableDeclaration");
 		}
 
-	private void nameDeclaration () throws ParseException {
+	private void nameDeclaration (SymbolTable sym) throws ParseException {
 		start("nameDeclaration");
 		if (! lex.isIdentifier()) 
 			parseError(27);
@@ -135,11 +146,11 @@ public class Parser {
 		if (! lex.match(":"))
 			parseError(19);
 		lex.nextLex();
-		type();
+		type(sym);
 		stop("nameDeclaration");
 		}
 
-	private void classDeclaration() throws ParseException {
+	private void classDeclaration(SymbolTable sym) throws ParseException {
 		start("classDeclaration");
 		if (! lex.match("class"))
 			parseError(5);
@@ -147,17 +158,17 @@ public class Parser {
 		if (! lex.isIdentifier())
 			parseError(27);
 		lex.nextLex();
-		classBody();
+		classBody(sym);
 		stop("classDeclaration");
 		}
 
-	private void classBody() throws ParseException {
+	private void classBody(SymbolTable sym) throws ParseException {
 		start("classBody");
 		if (! lex.match("begin"))
 			parseError(4);
 		lex.nextLex();
 		while (! lex.match("end")) {
-			nonClassDeclaration();
+			nonClassDeclaration(sym);
 			if (lex.match(";"))
 				lex.nextLex();
 			else
@@ -167,7 +178,7 @@ public class Parser {
 		stop("classBody");
 		}
 
-	private void functionDeclaration() throws ParseException {
+	private void functionDeclaration(SymbolTable sym) throws ParseException {
 		start("functionDeclaration");
 		if (! lex.match("function"))
 			parseError(10);
@@ -175,95 +186,100 @@ public class Parser {
 		if (! lex.isIdentifier())
 			parseError(27);
 		lex.nextLex();
-		arguments();
-		returnType();
-		functionBody();
+		arguments(sym);
+		returnType(sym);
+		functionBody(sym);
 		stop("functionDeclaration");
 		}
 		
-	private void arguments () throws ParseException {
+	private void arguments (SymbolTable sym) throws ParseException {
 		start("arguments");
 		if (! lex.match("("))
 			parseError(21);
 		lex.nextLex();
-		argumentList();
+		argumentList(sym);
 		if (! lex.match(")"))
 			parseError(22);
 		lex.nextLex();
 		stop("arguments");
 		}
 
-	private void argumentList () throws ParseException {
+	private void argumentList (SymbolTable sym) throws ParseException {
 		start("argumentList");
 		if (lex.isIdentifier()) {
-			nameDeclaration();
+			nameDeclaration(sym);
 			while (lex.match(",")) {
 				lex.nextLex();
-				nameDeclaration();
+				nameDeclaration(sym);
 				}
 			}
 		stop("argumentList");
 		}
 
-	private void returnType () throws ParseException {
+	private void returnType (SymbolTable sym) throws ParseException {
 		start("returnType");
 		if (lex.match(":")) {
 			lex.nextLex();
-			type();
+			type(sym);
 			}
 		stop("returnType");
 		}
 
-	private void type () throws ParseException {
+	private Type type (SymbolTable sym) throws ParseException {
 		start("type");
+		Type result = null;
 		if (lex.isIdentifier()) {
+			result = sym.lookupType(lex.tokenText());
 			lex.nextLex();
 			}
 		else if (lex.match("^")) {
 			lex.nextLex();
-			type();
+			result = new PointerType(type(sym));
 			}
-		else if (lex.match("[")) {
+		else if (lex.match("[")) {//This still needs work
 			lex.nextLex();
 			if (lex.tokenCategory() != lex.intToken)
 				parseError(32);
+			int lower = (new Integer(lex.tokenText()).intValue());
 			lex.nextLex();
 			if (! lex.match(":"))
 				parseError(19);
 			lex.nextLex();
 			if (lex.tokenCategory() != lex.intToken)
 				parseError(32);
+			int upper = (new Integer(lex.tokenText()).intValue());
 			lex.nextLex();
 			if (! lex.match("]"))
 				parseError(24);
 			lex.nextLex();
-			type();
+			result = new ArrayType(lower, upper, result);
 			}
 		else
 			parseError(30);
 		stop("type");
+		return result;
 		}
 
-	private void functionBody () throws ParseException {
+	private void functionBody (SymbolTable sym) throws ParseException {
 		start("functionBody");
 		while (! lex.match("begin")) {
-			nonClassDeclaration();
+			nonClassDeclaration(sym);
 			if (lex.match(";"))
 				lex.nextLex();
 			else
 				throw new ParseException(18);
 		}
-		compoundStatement();
+		compoundStatement(sym);
 		stop("functionBody");
 		}
 
-	private void compoundStatement () throws ParseException {
+	private void compoundStatement (SymbolTable sym) throws ParseException {
 		start("compoundStatement");
 		if (! lex.match("begin"))
 			parseError(4);
 		lex.nextLex();
 		while (! lex.match("end")) {
-			statement();
+			statement(sym);
 			if (lex.match(";"))
 				lex.nextLex();
 			else
@@ -273,24 +289,24 @@ public class Parser {
 		stop("compoundStatement");
 		}
 
-	private void statement () throws ParseException {
+	private void statement (SymbolTable sym) throws ParseException {
 		start("statement");
 		if (lex.match("return"))
-			returnStatement();
+			returnStatement(sym);
 		else if (lex.match("if"))
-			ifStatement();
+			ifStatement(sym);
 		else if (lex.match("while"))
-			whileStatement();
+			whileStatement(sym);
 		else if (lex.match("begin"))
-			compoundStatement();
+			compoundStatement(sym);
 		else if (lex.isIdentifier())
-			assignOrFunction();
+			assignOrFunction(sym);
 		else
 			parseError(34);
 		stop("statement");
 		}
 
-	private boolean firstExpression() {
+	private boolean firstExpression(SymbolTable sym) {
 		if (lex.match("(") || lex.match("not") || lex.match("-") || lex.match("&"))
 			return true;
 		if (lex.isIdentifier())
@@ -302,14 +318,14 @@ public class Parser {
 		return false;
 		}
 
-	private void returnStatement () throws ParseException {
+	private void returnStatement (SymbolTable sym) throws ParseException {
 		start("returnStatement");
 		if (! lex.match("return"))
 			parseError(12);
 		lex.nextLex();
 		if (lex.match("(")) {
 			lex.nextLex();
-			expression();
+			expression(sym);
 			if (! lex.match(")"))
 				parseError(22);
 			lex.nextLex();
@@ -317,7 +333,7 @@ public class Parser {
 		stop("returnStatement");
 		}
 
-	private void ifStatement () throws ParseException {
+	private void ifStatement (SymbolTable sym) throws ParseException {
 		start("ifStatement");
 		if (! lex.match("if"))
 			parseError(11);
@@ -326,20 +342,20 @@ public class Parser {
 			throw new ParseException(21);
 		else
 			lex.nextLex();
-		expression();
+		expression(sym);
 		if (! lex.match(")"))
 			throw new ParseException(22);
 		else
 			lex.nextLex();
-		statement();
+		statement(sym);
 		if (lex.match("else")) {
 			lex.nextLex();
-			statement();
+			statement(sym);
 			}
 		stop("ifStatement");
 		}
 
-	private void whileStatement () throws ParseException {
+	private void whileStatement (SymbolTable sym) throws ParseException {
 		start("whileStatement");
 		if (! lex.match("while"))
 			parseError(16);
@@ -348,25 +364,25 @@ public class Parser {
 			throw new ParseException(21);
 		else
 			lex.nextLex();
-		expression();
+		expression(sym);
 		if (! lex.match(")"))
 			throw new ParseException(22);
 		else
 			lex.nextLex();
-		statement();
+		statement(sym);
 		stop("whileStatement");
 		}
 
-	private void assignOrFunction () throws ParseException {
+	private void assignOrFunction (SymbolTable sym) throws ParseException {
 		start("assignOrFunction");
-		reference();
+		reference(sym);
 		if (lex.match("=")) {
 			lex.nextLex();
-			expression();
+			expression(sym);
 			}
 		else if (lex.match("(")) {
 			lex.nextLex();
-			parameterList();
+			parameterList(sym);
 			if (! lex.match(")"))
 				parseError(22);
 			lex.nextLex();
@@ -376,29 +392,29 @@ public class Parser {
 		stop("assignOrFunction");
 		}
 
-	private void parameterList () throws ParseException {
+	private void parameterList (SymbolTable sym) throws ParseException {
 		start("parameterList");
-		if (firstExpression()) {
-			expression();
+		if (firstExpression(sym)) {
+			expression(sym);
 			while (lex.match(",")) {
 				lex.nextLex();
-				expression();
+				expression(sym);
 				}
 			}
 		stop("parameterList");
 		}
 
-	private void expression () throws ParseException {
+	private void expression (SymbolTable sym) throws ParseException {
 		start("expression");
-		relExpression();
+		relExpression(sym);
 		while (lex.match("and") || lex.match("or")) {
 			lex.nextLex();
-			relExpression();
+			relExpression(sym);
 			}
 		stop("expression");
 		}
 
-	private boolean relOp() {
+	private boolean relOp(SymbolTable sym) {
 		if (lex.match("<") || lex.match("<=") ||
 			lex.match("==") || lex.match("!=") ||
 				lex.match(">") || lex.match(">="))
@@ -406,60 +422,60 @@ public class Parser {
 		return false;
 		}
 
-	private void relExpression () throws ParseException {
+	private void relExpression (SymbolTable sym) throws ParseException {
 		start("relExpression");
-		plusExpression();
-		if (relOp()) {
+		plusExpression(sym);
+		if (relOp(sym)) {
 			lex.nextLex();
-			plusExpression();
+			plusExpression(sym);
 			}
 		stop("relExpression");
 		}
 
-	private void plusExpression () throws ParseException {
+	private void plusExpression (SymbolTable sym) throws ParseException {
 		start("plusExpression");
-		timesExpression();
+		timesExpression(sym);
 		while (lex.match("+") || lex.match("-") || lex.match("<<")) {
 			lex.nextLex();
-			timesExpression();
+			timesExpression(sym);
 			}
 		stop("plusExpression");
 		}
 
-	private void timesExpression () throws ParseException {
+	private void timesExpression (SymbolTable sym) throws ParseException {
 		start("timesExpression");
-		term();
+		term(sym);
 		while (lex.match("*") || lex.match("/") || lex.match("%")) {
 			lex.nextLex();
-			term();
+			term(sym);
 			}
 		stop("timesExpression");
 		}
 
-	private void term () throws ParseException {
+	private void term (SymbolTable sym) throws ParseException {
 		start("term");
 		if (lex.match("(")) {
 			lex.nextLex();
-			expression();
+			expression(sym);
 			if (! lex.match(")"))
 				parseError(22);
 			lex.nextLex();
 			}
 		else if (lex.match("not")) {
 			lex.nextLex();
-			term();
+			term(sym);
 			}
 		else if (lex.match("new")) {
 			lex.nextLex();
-			type();
+			type(sym);
 			}
 		else if (lex.match("-")) {
 			lex.nextLex();
-			term();
+			term(sym);
 			}
 		else if (lex.match("&")) {
 			lex.nextLex();
-			reference();
+			reference(sym);
 			}
 		else if (lex.tokenCategory() == lex.intToken) {
 			lex.nextLex();
@@ -471,10 +487,10 @@ public class Parser {
 			lex.nextLex();
 			}
 		else if (lex.isIdentifier()) {
-			reference();
+			reference(sym);
 			if (lex.match("(")) {
 				lex.nextLex();
-				parameterList();
+				parameterList(sym);
 				if (! lex.match(")"))
 					parseError(22);
 				lex.nextLex();
@@ -485,7 +501,7 @@ public class Parser {
 		stop("term");
 		}
 
-	private void reference () throws ParseException {
+	private void reference (SymbolTable sym) throws ParseException {
 		start("reference");
 		if (! lex.isIdentifier())
 			parseError(27);
@@ -502,7 +518,7 @@ public class Parser {
 				}
 			else {
 				lex.nextLex();
-				expression();
+				expression(sym);
 				if (! lex.match("]"))
 					parseError(24);
 				lex.nextLex();
