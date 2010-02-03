@@ -117,6 +117,7 @@ public class Parser {
 		stop("constantDeclaration");
 		}
 
+	// This needs to be changed to accommodate type
 	private void typeDeclaration (SymbolTable sym) throws ParseException {
 		start("typeDeclaration");
 		if (lex.match("type")) {
@@ -138,6 +139,7 @@ public class Parser {
 		stop("variableDeclaration");
 		}
 
+	// This might have to have to pick up and return type?
 	private void nameDeclaration (SymbolTable sym) throws ParseException {
 		start("nameDeclaration");
 		if (! lex.isIdentifier()) 
