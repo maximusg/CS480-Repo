@@ -2,12 +2,14 @@
 //	written (and rewritten) by Tim Budd
 //
 
+import java.util.*;
+
 interface SymbolTable {
 		// methods to enter values into symbol table
-	public void enterConstant (String name, Ast value);
-	public void enterType (String name, Type type);
-	public void enterVariable (String name, Type type);
-	public void enterFunction (String name, FunctionType ft);
+	public void enterConstant (String name, Ast value) throws ParseException;
+	public void enterType (String name, Type type) throws ParseException;
+	public void enterVariable (String name, Type type) throws ParseException;
+	public void enterFunction (String name, FunctionType ft) throws ParseException;
 	public int size();
 
 		// methods to search the symbol table
@@ -17,29 +19,29 @@ interface SymbolTable {
 }
 
 class GlobalSymbolTable implements SymbolTable {
-	public void enterConstant (String name, Ast value) 
+	private Map<String, Symbol> sym = new TreeMap<String, Symbol>();
+	
+	public void enterConstant (String name, Ast value) throws ParseException
 		{ enterSymbol(new ConstantSymbol(name, value)); }
 
-	public void enterType (String name, Type type) 
+	public void enterType (String name, Type type ) throws ParseException
 		{ enterSymbol (new TypeSymbol(name, type)); }
 
-	public void enterVariable (String name, Type type)
+	public void enterVariable (String name, Type type) throws ParseException
 		{ enterSymbol (new GlobalSymbol(name, new AddressType(type), name)); }
 
-	public void enterFunction (String name, FunctionType ft) 
+	public void enterFunction (String name, FunctionType ft) throws ParseException 
 		{ enterSymbol (new GlobalSymbol(name, ft, name)); }
 
-	private void enterSymbol (Symbol s) {
-		// this if for you to figure out.
-		// how should a symbol be stored?
-		// ...
+	public void enterSymbol (Symbol s) throws ParseException
+	{
+		if (sym.containsValue(s))
+			throw new ParseException(35, s.name);
+		sym.put(s.name, s);
 	}
 
-	private Symbol findSymbol (String name) {
-		// this is also for you to figure out.
-		// read a symbol.  If not found, return null
-		// ...
-		return null;
+	public Symbol findSymbol (String name) {
+		return (sym.containsKey(name) ? sym.get(name) : null);
 	}
 
 	public boolean nameDefined (String name) {
@@ -53,7 +55,7 @@ class GlobalSymbolTable implements SymbolTable {
 		if ((s != null) && (s instanceof TypeSymbol)) {
 			TypeSymbol ts = (TypeSymbol) s;
 			return ts.type;
-			}
+		}
 		throw new ParseException(30);
 	}
 
@@ -65,11 +67,11 @@ class GlobalSymbolTable implements SymbolTable {
 		if (s instanceof GlobalSymbol) {
 			GlobalSymbol gs = (GlobalSymbol) s;
 			return new GlobalNode(gs.type, name);
-			}
+		}
 		if (s instanceof ConstantSymbol) {
 			ConstantSymbol cs = (ConstantSymbol) s;
 			return cs.value;
-			}
+		}
 		return null; // should never happen
 	}
 
@@ -81,36 +83,35 @@ class GlobalSymbolTable implements SymbolTable {
 }
 
 class FunctionSymbolTable implements SymbolTable {
-	SymbolTable surrounding = null;
+	private Map<String, Symbol> sym = new TreeMap<String, Symbol>();
+	private int sz = 0;
+	
+	private GlobalSymbolTable surrounding = null;
 
-	FunctionSymbolTable (SymbolTable st) { surrounding = st; }
+	FunctionSymbolTable (GlobalSymbolTable st) { surrounding = st; }
 
-	public void enterConstant (String name, Ast value) 
+	public void enterConstant (String name, Ast value)  throws ParseException
 		{ enterSymbol(new ConstantSymbol(name, value)); }
 
-	public void enterType (String name, Type type) 
+	public void enterType (String name, Type type)  throws ParseException
 		{ enterSymbol (new TypeSymbol(name, type)); }
 
-	public void enterVariable (String name, Type type)
-	{
-		// this is for you to figure out.
-		// I'll leave a stub, which you should
-		// replace with the real thing
-		enterSymbol(new OffsetSymbol(name, new AddressType(type), 27));
-	}
+	public void enterVariable (String name, Type type) throws ParseException
+		{ enterSymbol(new OffsetSymbol(name, new AddressType(type), 27)); sz += type.size();  }
 
-	public void enterFunction (String name, FunctionType ft) 
+	public void enterFunction (String name, FunctionType ft)  throws ParseException
 		{ enterSymbol (new GlobalSymbol(name, ft, name)); }
 
 	public boolean doingArguments = true;
 
-	private void enterSymbol (Symbol s) {
-		// you can just copy from the first one
+	private void enterSymbol (Symbol s) throws ParseException {
+		if (sym.containsValue(s))
+			throw new ParseException(35, s.name);
+		sym.put(s.name, s);
 	}
 
 	private Symbol findSymbol (String name) {
-		// 
-		return null;
+		return (sym.containsKey(name) ? sym.get(name) : null);
 	}
 
 	public boolean nameDefined (String name) {
@@ -152,40 +153,38 @@ class FunctionSymbolTable implements SymbolTable {
 
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+		return sz;
 	}
 }
 
 class ClassSymbolTable implements SymbolTable {
-	private SymbolTable surround = null;
+	private Map<String, Symbol> sym = new TreeMap<String, Symbol>();
+	private int sz = 0;
+	
+	private GlobalSymbolTable surround = null;
 
-	ClassSymbolTable (SymbolTable s) { surround = s; }
+	ClassSymbolTable (GlobalSymbolTable s) { surround = s; }
 
-	public void enterConstant (String name, Ast value) 
+	public void enterConstant (String name, Ast value) throws ParseException 
 		{ enterSymbol(new ConstantSymbol(name, value)); }
 
-	public void enterType (String name, Type type) 
+	public void enterType (String name, Type type) throws ParseException 
 		{ enterSymbol (new TypeSymbol(name, type)); }
 
-	public void enterVariable (String name, Type type)
-		{ 
-			// again, you need to do something different here.
-			enterSymbol(new OffsetSymbol(name, new AddressType(type), 27));
-		}
+	public void enterVariable (String name, Type type) throws ParseException
+		{ enterSymbol(new OffsetSymbol(name, new AddressType(type), 27)); sz += type.size();  }
 
-	public void enterFunction (String name, FunctionType ft) 
-		// this should really be different as well,
-		// but we will leave alone for now
-		{ enterSymbol (new GlobalSymbol(name, ft, name)); }
+	public void enterFunction (String name, FunctionType ft) throws ParseException 
+		{ throw new ParseException(0, "METHODS NOT ALLOWED!"); }
 
-	private void enterSymbol (Symbol s) {
-		// ...
+	private void enterSymbol (Symbol s) throws ParseException {
+		if (sym.containsValue(s))
+			throw new ParseException(35, s.name);
+		sym.put(s.name, s);
 	}
 
 	private Symbol findSymbol (String name) {
-		// ...
-		return null;
+		return (sym.containsKey(name) ? sym.get(name) : null);
 	}
 
 	public boolean nameDefined (String name) {
@@ -226,7 +225,6 @@ class ClassSymbolTable implements SymbolTable {
 
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+		return sz;
 	}
 }
