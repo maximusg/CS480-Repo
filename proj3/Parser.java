@@ -225,34 +225,39 @@ public class Parser {
 		stop("returnType");
 		}
 
-	private void type (SymbolTable sym) throws ParseException {
+	private Type type (SymbolTable sym) throws ParseException {
 		start("type");
+		Type result = null;
 		if (lex.isIdentifier()) {
+			result = sym.lookupType(lex.tokenText());
 			lex.nextLex();
 			}
 		else if (lex.match("^")) {
 			lex.nextLex();
-			type(sym);
+			result = new PointerType(type(sym));
 			}
-		else if (lex.match("[")) {
+		else if (lex.match("[")) {//This still needs work
 			lex.nextLex();
 			if (lex.tokenCategory() != lex.intToken)
 				parseError(32);
+			int lower = (new Integer(lex.tokenText()).intValue());
 			lex.nextLex();
 			if (! lex.match(":"))
 				parseError(19);
 			lex.nextLex();
 			if (lex.tokenCategory() != lex.intToken)
 				parseError(32);
+			int upper = (new Integer(lex.tokenText()).intValue());
 			lex.nextLex();
 			if (! lex.match("]"))
 				parseError(24);
 			lex.nextLex();
-			type(sym);
+			result = new ArrayType(lower, upper, result);
 			}
 		else
 			parseError(30);
 		stop("type");
+		return result;
 		}
 
 	private void functionBody (SymbolTable sym) throws ParseException {
