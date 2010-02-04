@@ -28,7 +28,7 @@ public class Parser {
 	}
 
 	private final void start (String n) {
-		if (debug) System.out.println("start " + n + 
+		if(debug) System.out.println("start " + n + 
 			" token: " + lex.tokenText());
 	}
 
@@ -127,7 +127,7 @@ public class Parser {
 			String s = lex.tokenText();
 			Type result = nameDeclaration(sym);
 			sym.enterType (s, result );
-			lex.nextLex();
+			//lex.nextLex();
 		} else
 			parseError(14); 
 		stop("typeDeclaration");
@@ -152,11 +152,17 @@ public class Parser {
 		start("nameDeclaration");
 		if (! lex.isIdentifier()) 
 			parseError(27);
+		String s = lex.tokenText();
+		if(sym.nameDefined(s)){
+			throw new ParseException(35,s);
+		}
 		lex.nextLex();
 		if (! lex.match(":"))
 			parseError(19);
 		lex.nextLex();
 		Type result = type(sym);
+		
+		//sym.enterVariable(s,result);
 		stop("nameDeclaration");
 		return result;
 		
@@ -197,10 +203,15 @@ public class Parser {
 		lex.nextLex();
 		if (! lex.isIdentifier())
 			parseError(27);
+		String s =  lex.tokenText();
 		lex.nextLex();
-		arguments(sym);
-		returnType(sym);
-		functionBody(sym);
+		FunctionSymbolTable fst = new FunctionSymbolTable((GlobalSymbolTable) sym);
+		fst.doingArguments = true;
+		arguments(fst);
+		Type t = returnType(sym);
+		fst.doingArguments = false;
+		functionBody(fst,s);
+		sym.enterFunction(s, new FunctionType(t));
 		stop("functionDeclaration");
 		}
 		
@@ -252,7 +263,7 @@ public class Parser {
 			lex.nextLex();
 			result = new PointerType(type(sym));
 			}
-		else if (lex.match("[")) {//This still needs work
+		else if (lex.match("[")) {
 			lex.nextLex();
 			if (lex.tokenCategory() != lex.intToken)
 				parseError(32);
@@ -268,7 +279,7 @@ public class Parser {
 			if (! lex.match("]"))
 				parseError(24);
 			lex.nextLex();
-			result = sym.lookupType(lex.tokenText());
+			result = type(sym);
 			result = new ArrayType(lower, upper, result);
 			}
 		else
@@ -277,7 +288,7 @@ public class Parser {
 		return result;
 		}
 
-	private void functionBody (SymbolTable sym) throws ParseException {
+	private void functionBody (SymbolTable sym, String name) throws ParseException {
 		start("functionBody");
 		while (! lex.match("begin")) {
 			nonClassDeclaration(sym);
@@ -286,7 +297,9 @@ public class Parser {
 			else
 				throw new ParseException(18);
 		}
+		CodeGen.genProlog(name,sym.size());
 		compoundStatement(sym);
+		CodeGen.genEpilog(name);
 		stop("functionBody");
 		}
 
