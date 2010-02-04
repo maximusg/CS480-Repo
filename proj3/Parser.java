@@ -1,7 +1,7 @@
 //
 //	parser skeleton, CS 480/580, Winter 2001
 //	written by Tim Budd
-//		modified by:
+//		modified by: Brad Kessler, Sarah Clisby, Richard Tracy, Max Geiszler
 //
 
 public class Parser {
@@ -228,13 +228,17 @@ public class Parser {
 		stop("argumentList");
 		}
 
-	private void returnType (SymbolTable sym) throws ParseException {
+	private Type returnType (SymbolTable sym) throws ParseException {
+		Type result = null;
 		start("returnType");
 		if (lex.match(":")) {
 			lex.nextLex();
-			type(sym);
-			}
+			result = type(sym);
+		}else{
+			result = PrimitiveType.VoidType;
+		}
 		stop("returnType");
+		return result;
 		}
 
 	private Type type (SymbolTable sym) throws ParseException {
