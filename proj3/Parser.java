@@ -175,8 +175,11 @@ public class Parser {
 		lex.nextLex();
 		if (! lex.isIdentifier())
 			parseError(27);
+		String s = lex.tokenText();
 		lex.nextLex();
-		classBody(sym);
+		ClassSymbolTable cst = new ClassSymbolTable((GlobalSymbolTable)sym);
+		classBody(cst);
+		sym.enterType(s, new ClassType(cst));
 		stop("classDeclaration");
 		}
 
