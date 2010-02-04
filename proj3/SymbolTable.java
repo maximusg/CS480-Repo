@@ -55,7 +55,7 @@ class GlobalSymbolTable implements SymbolTable {
 		} else if (s instanceof TypeSymbol) {
 			return ((TypeSymbol) s).type;
 		} else {
-			throw new ParseException(30);
+			throw new ParseException(30, name);
 		}
 	}
 
