@@ -45,34 +45,31 @@ class GlobalSymbolTable implements SymbolTable {
 	}
 
 	public boolean nameDefined (String name) {
-		Symbol s = findSymbol(name);
-		if (s != null) return true;
-		else return false;
+		return findSymbol(name) != null;
 	}
 
 	public Type lookupType (String name) throws ParseException {
 		Symbol s = findSymbol(name);
-		if ((s != null) && (s instanceof TypeSymbol)) {
-			TypeSymbol ts = (TypeSymbol) s;
-			return ts.type;
+		if (s == null){
+			throw new ParseException(42, name);
+		} else if (s instanceof TypeSymbol) {
+			return ((TypeSymbol) s).type;
+		} else {
+			throw new ParseException(30);
 		}
-		throw new ParseException(30);
 	}
 
 	public Ast lookupName (Ast base, String name) throws ParseException {
 		Symbol s = findSymbol(name);
-		if (s == null)
-			throw new ParseException(41, name);
-		// now have a valid symbol
-		if (s instanceof GlobalSymbol) {
-			GlobalSymbol gs = (GlobalSymbol) s;
-			return new GlobalNode(gs.type, name);
+		if (s == null){
+			throw new ParseException(42, name);
+		} else if (s instanceof GlobalSymbol) {
+			return new GlobalNode(((GlobalSymbol) s).type, name);
+		} else if (s instanceof ConstantSymbol) {
+			return ((ConstantSymbol) s).value;
+		} else {
+			return null; // should never happen
 		}
-		if (s instanceof ConstantSymbol) {
-			ConstantSymbol cs = (ConstantSymbol) s;
-			return cs.value;
-		}
-		return null; // should never happen
 	}
 
 	@Override
