@@ -1,6 +1,6 @@
 //
 //	written (and rewritten) by Tim Budd
-//
+//	modified by: Brad Kessler, Sarah Clisby, Richard Tracy, Max Geiszler
 
 import java.util.*;
 
@@ -82,6 +82,7 @@ class GlobalSymbolTable implements SymbolTable {
 class FunctionSymbolTable implements SymbolTable {
 	private Map<String, Symbol> sym = new TreeMap<String, Symbol>();
 	private int sz = 0;
+	private int argSz = 0;
 	
 	private GlobalSymbolTable surrounding = null;
 
@@ -94,7 +95,16 @@ class FunctionSymbolTable implements SymbolTable {
 		{ enterSymbol (new TypeSymbol(name, type)); }
 
 	public void enterVariable (String name, Type type) throws ParseException
-		{ enterSymbol(new OffsetSymbol(name, new AddressType(type), 27)); sz += type.size();  }
+		{ 
+			if (doingArguments){
+				enterSymbol(new OffsetSymbol(name, new AddressType(type), (8 + argSz)));
+				argSz += type.size();
+			} else {
+				sz += type.size();
+				enterSymbol(new OffsetSymbol(name, new AddressType(type), 0 - sz));
+				
+			}
+		}
 
 	public void enterFunction (String name, FunctionType ft)  throws ParseException
 		{ enterSymbol (new GlobalSymbol(name, ft, name)); }
@@ -169,7 +179,7 @@ class ClassSymbolTable implements SymbolTable {
 		{ enterSymbol (new TypeSymbol(name, type)); }
 
 	public void enterVariable (String name, Type type) throws ParseException
-		{ enterSymbol(new OffsetSymbol(name, new AddressType(type), 27)); sz += type.size();  }
+		{ enterSymbol(new OffsetSymbol(name, new AddressType(type), sz)); sz += type.size();  }
 
 	public void enterFunction (String name, FunctionType ft) throws ParseException 
 		{ throw new ParseException(0, "METHODS NOT ALLOWED!"); }

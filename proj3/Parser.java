@@ -97,19 +97,20 @@ public class Parser {
 			lex.nextLex();
 			if (! lex.isIdentifier())
 				parseError(27);
+			String s = lex.tokenText();
 			lex.nextLex();
 			if (! lex.match("="))
 				parseError(20);
 			lex.nextLex();
 			if (lex.tokenCategory() == lex.intToken){
 				Ast intVar = new IntegerNode(new Integer(lex.tokenText()));
-				sym.enterConstant(lex.tokenText(), intVar);
+				sym.enterConstant(s, intVar);
 			}else if (lex.tokenCategory() == lex.realToken){
 				Ast realVar = new RealNode(new Double(lex.tokenText()));
-				sym.enterConstant(lex.tokenText(), realVar);
+				sym.enterConstant(s, realVar);
 			}else if (lex.tokenCategory() == lex.stringToken){
 				Ast stringVar = new StringNode(lex.tokenText());
-				sym.enterConstant(lex.tokenText(), stringVar);
+				sym.enterConstant(s, stringVar);
 			}else
 				parseError(31);
 			lex.nextLex();
@@ -233,10 +234,14 @@ public class Parser {
 	private void argumentList (SymbolTable sym) throws ParseException {
 		start("argumentList");
 		if (lex.isIdentifier()) {
-			nameDeclaration(sym);
+			String s = lex.tokenText();
+			Type t = nameDeclaration(sym);
+			sym.enterVariable(s, t);
 			while (lex.match(",")) {
 				lex.nextLex();
-				nameDeclaration(sym);
+				 s = lex.tokenText();
+				 t = nameDeclaration(sym);
+				sym.enterVariable(s, t);
 				}
 			}
 		stop("argumentList");
@@ -408,7 +413,8 @@ public class Parser {
 
 	private void assignOrFunction (SymbolTable sym) throws ParseException {
 		start("assignOrFunction");
-		reference(sym);
+		Ast ast = reference(sym);
+		ast.genCode();
 		if (lex.match("=")) {
 			lex.nextLex();
 			expression(sym);
@@ -520,7 +526,8 @@ public class Parser {
 			lex.nextLex();
 			}
 		else if (lex.isIdentifier()) {
-			reference(sym);
+			Ast ast = reference(sym);
+			ast.genCode();
 			if (lex.match("(")) {
 				lex.nextLex();
 				parameterList(sym);
