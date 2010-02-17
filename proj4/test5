@@ -1,0 +1,7 @@
+function main ()
+var a : int;
+var r : real;
+begin
+		{ should generate an error } 
+	a = r % 3;
+end;

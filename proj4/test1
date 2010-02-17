@@ -1,0 +1,22 @@
+function gcd (a : int, b : int) : int
+begin
+	while (a != b) 
+		if (a > b) 
+			a = a - b
+		else
+			b = b - a;
+	return (a);
+end;
+
+function main ()
+var n : int;
+var m : int;
+begin
+	printStr("Euclids GCD algorithm");
+	n = 182;
+	printInt(n);
+	m = 258;
+	printInt(m);
+	printInt(gcd(n,m));
+end;
+

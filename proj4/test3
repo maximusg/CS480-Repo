@@ -1,0 +1,6 @@
+function main ()
+var a : int;
+begin
+		{ should generate error }
+	a = (a < 3) and a;
+end;
