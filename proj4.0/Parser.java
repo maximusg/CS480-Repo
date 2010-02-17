@@ -161,7 +161,8 @@ public class Parser {
 			parseError(19);
 		lex.nextLex();
 		Type result = type(sym);
-		
+		if(sym instanceof GlobalSymbolTable)
+			CodeGen.genGlobal(s, result.size());
 		//sym.enterVariable(s,result);
 		stop("nameDeclaration");
 		return result;
