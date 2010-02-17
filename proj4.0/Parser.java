@@ -437,14 +437,16 @@ public class Parser {
 		stop("parameterList");
 		}
 
-	private void expression (SymbolTable sym) throws ParseException {
+	private Ast expression (SymbolTable sym) throws ParseException {
 		start("expression");
-		relExpression(sym);
-		while (lex.match("and") || lex.match("or")) {
+		Ast indexExpression = relExpression(sym);
+		while (lex.match("and") || lex.match("or")){
+			MustBeBoolean(indexExpression);
 			lex.nextLex();
-			relExpression(sym);
+			indexExpression = relExpression(sym);
 			}
 		stop("expression");
+		return indexExpression;
 		}
 
 	private boolean relOp(SymbolTable sym) {
@@ -455,41 +457,45 @@ public class Parser {
 		return false;
 		}
 
-	private void relExpression (SymbolTable sym) throws ParseException {
+	private Ast relExpression (SymbolTable sym) throws ParseException {
 		start("relExpression");
-		plusExpression(sym);
+		Ast indexExpression = plusExpression(sym);
 		if (relOp(sym)) {
 			lex.nextLex();
-			plusExpression(sym);
+			indexExpression = plusExpression(sym);
 			}
 		stop("relExpression");
+		return indexExpression;
 		}
 
-	private void plusExpression (SymbolTable sym) throws ParseException {
+	private Ast plusExpression (SymbolTable sym) throws ParseException {
 		start("plusExpression");
-		timesExpression(sym);
+		Ast indexExpression = timesExpression(sym);
 		while (lex.match("+") || lex.match("-") || lex.match("<<")) {
 			lex.nextLex();
-			timesExpression(sym);
+			indexExpression = timesExpression(sym);
 			}
 		stop("plusExpression");
+		return indexExpression;
 		}
 
-	private void timesExpression (SymbolTable sym) throws ParseException {
+	private Ast timesExpression (SymbolTable sym) throws ParseException {
 		start("timesExpression");
-		term(sym);
+		Ast indexExpression = term(sym);
 		while (lex.match("*") || lex.match("/") || lex.match("%")) {
 			lex.nextLex();
-			term(sym);
+			indexExpression = term(sym);
 			}
 		stop("timesExpression");
+		return indexExpression;
 		}
 
-	private void term (SymbolTable sym) throws ParseException {
+	private Ast term (SymbolTable sym) throws ParseException {
 		start("term");
+		Ast indexExpression = null;
 		if (lex.match("(")) {
 			lex.nextLex();
-			expression(sym);
+			indexExpression = expression(sym);
 			if (! lex.match(")"))
 				parseError(22);
 			lex.nextLex();
@@ -532,10 +538,12 @@ public class Parser {
 		else
 			parseError(33);
 		stop("term");
+		return indexExpression;
 		}
 
-	private void reference (SymbolTable sym) throws ParseException {
+	private Ast reference (SymbolTable sym) throws ParseException {
 		start("reference");
+		Ast indexExpression = null;
 		if (! lex.isIdentifier())
 			parseError(27);
 		lex.nextLex();
@@ -551,13 +559,20 @@ public class Parser {
 				}
 			else {
 				lex.nextLex();
-				expression(sym);
+				indexExpression = expression(sym);
 				if (! lex.match("]"))
 					parseError(24);
 				lex.nextLex();
 				}
 			}
+		
 		stop("reference");
+		return indexExpression;
 		}
 
+	private void MustBeBoolean(Ast a) throws ParseException{
+		if(!a.type.equals(PrimitiveType.BooleanType)){
+			parseError(43);
+		}
+	}
 }
