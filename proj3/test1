@@ -1,8 +1,27 @@
-var x : int;
+var x : real;
+type b : int;
+var c : real;
+const r = "string";
+
+
 
 class barn
 begin
-   var y : int;
+   var y : double;
+end;
+
+
+function blah(r : int , c : real)
+begin
+
+if(b < c)
+a=b
+else
+while(c>b)
+c=b;
+while(b < c)
+b=0;
+return;
 end;
 
 function main()
