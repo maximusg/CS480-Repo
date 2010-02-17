@@ -1,8 +1,0 @@
-var x : int;
-function main (i : int)
-begin
-	i = 8;
-	printInt(i);
-	printInt(x);
-end;
-

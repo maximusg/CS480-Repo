@@ -1,6 +1,0 @@
-function main() 
-var a : ^ int;
-begin
-	a = new int;
-end;
-

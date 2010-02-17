@@ -1,7 +1,0 @@
-var x : int;
-function main (y : real, y2 : int)
-var z : real;
-var z2 : int;
-begin
-	y = y2;
-end;
