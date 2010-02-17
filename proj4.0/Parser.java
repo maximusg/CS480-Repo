@@ -455,20 +455,36 @@ public class Parser {
 		return indexExpression;
 		}
 
-	private boolean relOp(SymbolTable sym) {
-		if (lex.match("<") || lex.match("<=") ||
-			lex.match("==") || lex.match("!=") ||
-				lex.match(">") || lex.match(">="))
-				return true;
-		return false;
+	private int relOp(SymbolTable sym) {
+		int result = -1;
+		if (lex.match("<")){
+			result = BinaryNode.less;
+		}else if(lex.match("<=")){
+			result = BinaryNode.lessEqual;
+		}else if(lex.match("==")){
+			result = BinaryNode.equal;
+		}else if (lex.match("!=")){
+			result = BinaryNode.notEqual;
+		}else if (lex.match(">")){
+			result = BinaryNode.greater;
+		}else if(lex.match(">=")){
+			result = BinaryNode.greaterEqual;
+		}
+				
+		return result;
 		}
 
 	private Ast relExpression (SymbolTable sym) throws ParseException {
 		start("relExpression");
 		Ast indexExpression = plusExpression(sym);
-		if (relOp(sym)) {
+		int BNresult = relOp(sym);
+		if (BNresult > 0) {
 			lex.nextLex();
-			indexExpression = plusExpression(sym);
+			Ast result = plusExpression(sym);
+		    if (! indexExpression.type.equals(result.type)){
+			    parseError(44);
+		     }
+			indexExpression = new BinaryNode(BNresult, PrimitiveType.BooleanType, indexExpression, result);
 			}
 		stop("relExpression");
 		return indexExpression;
