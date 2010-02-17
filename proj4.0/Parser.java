@@ -442,9 +442,15 @@ public class Parser {
 		Ast indexExpression = relExpression(sym);
 		while (lex.match("and") || lex.match("or")){
 			MustBeBoolean(indexExpression);
+			String text = lex.tokenText();
 			lex.nextLex();
-			indexExpression = relExpression(sym);
+			Ast result = relExpression(sym);
+			if(text.equals("and")){
+				indexExpression = new BinaryNode(BinaryNode.and, PrimitiveType.BooleanType, indexExpression, result);
+			}else{
+				indexExpression = new BinaryNode(BinaryNode.or, PrimitiveType.BooleanType, indexExpression, result);
 			}
+		}
 		stop("expression");
 		return indexExpression;
 		}
