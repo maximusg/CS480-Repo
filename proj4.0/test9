@@ -1,14 +1,4 @@
-var x : int;
-var y : [ 2 : 5 ] int;
-class foo
+function foo (a : int, a : real)
 begin
-	var a : int;
-	var b : [7 : 34 ] real;
-end;
-
-var z : foo;
-
-function main ()
-begin
-	z.b[10 + 2] = 3.14 / 2.0;
+	a = 8;
 end;

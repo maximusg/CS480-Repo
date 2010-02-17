@@ -1,22 +1,12 @@
-function gcd (a : int, b : int) : int
+var x : int;
+
+class barn
 begin
-	while (a != b) 
-		if (a > b) 
-			a = a - b
-		else
-			b = b - a;
-	return (a);
+   var y : int;
 end;
 
-function main ()
-var n : int;
-var m : int;
+function main()
+var cow : barn;
 begin
-	printStr("Euclids GCD algorithm");
-	n = 182;
-	printInt(n);
-	m = 258;
-	printInt(m);
-	printInt(gcd(n,m));
+   cow.x = 7;
 end;
-

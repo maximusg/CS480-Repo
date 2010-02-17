@@ -1,6 +1,14 @@
-function main ()
-var a : int;
+const max = 4;
+
+class foo
 begin
-		{ should generate error }
-	a = (a < 3) and a;
+	const max = 7;
+	var y : int;
+	var z : real;
+end;
+
+function main ()
+var q : foo;
+begin
+	q.z = 3.4;
 end;

@@ -92,7 +92,6 @@ class UnaryNode extends Ast {
 	static final int convertToReal = 2;
 	static final int notOp = 3;
 	static final int negation = 4;
-	static final int newOp = 5;
 
 
 	public UnaryNode (int nt, Type t, Ast b) { 
@@ -108,19 +107,34 @@ class UnaryNode extends Ast {
 		"(" + child + ")" + type; }
 
 	public void genCode () {
-		child.genCode();
 		switch(nodeType) {
 			case dereference:
-				System.out.println("dereference " + type); break;
+				child.genCode();
+				System.out.println("dereference " + type); 
+				break;
 			case convertToReal:
-				System.out.println("convert to real" + type); break;
+				child.genCode();
+				System.out.println("convert to real" + type); 
+				break;
 			case notOp:
-				System.out.println("not op " + type); break;
+				child.genCode();
+				System.out.println("not op " + type); 
+				break;
 			case negation:
-				System.out.println("numeric negation " + type); break;
-			case newOp:
-				System.out.println("new memory " + type); break;
+				child.genCode();
+				System.out.println("numeric negation " + type);
+				break;
 		}
+	}
+
+	public void branchIfTrue (Label lab) throws ParseException {
+		genCode();
+		System.out.println("Branch if True " + lab);
+	}
+
+	public void branchIfFalse (Label lab) throws ParseException { 
+		genCode();
+		System.out.println("Branch if False " + lab);
 	}
 }
 
@@ -151,39 +165,89 @@ class BinaryNode extends Ast {
 		"(" + LeftChild + "," + RightChild + ")" + type; }
 
 	public void genCode () {
-		LeftChild.genCode();
-		RightChild.genCode();
 		switch (NodeType) {
 			case plus: 
-				System.out.println("do addition " + type); break;
+				LeftChild.genCode();
+				RightChild.genCode();
+				System.out.println("do addition " + type); 
+				break;
 			case minus: 
-				System.out.println("do subtraction " + type); break;
+				LeftChild.genCode();
+				RightChild.genCode();
+				System.out.println("do subtraction " + type); 
+				break;
 			case leftShift: 
-				System.out.println("do left shift " + type); break;
+				LeftChild.genCode();
+				RightChild.genCode();
+				System.out.println("do left shift " + type); 
+				break;
 			case times: 
-				System.out.println("do multiplication " + type); break;
+				LeftChild.genCode();
+				RightChild.genCode();
+				System.out.println("do multiplication " + type); 
+				break;
 			case divide: 
-				System.out.println("do division " + type); break;
+				LeftChild.genCode();
+				RightChild.genCode();
+				System.out.println("do division " + type); 
+				break;
 			case remainder:
-				System.out.println("do remainder " + type); break;
+				LeftChild.genCode();
+				RightChild.genCode();
+				System.out.println("do remainder " + type); 
+				break;
 			case and: 
-				System.out.println("do and " + type); break;
+				LeftChild.genCode();
+				RightChild.genCode();
+				System.out.println("do and " + type); 
+				break;
 			case or: 
-				System.out.println("do or " + type); break;
+				LeftChild.genCode();
+				RightChild.genCode();
+				System.out.println("do or " + type); 
+				break;
 			case less: 
-				System.out.println("compare less " + type); break;
+				LeftChild.genCode();
+				RightChild.genCode();
+				System.out.println("compare less " + type); 
+				break;
 			case lessEqual: 
-				System.out.println("compare less or equal" + type); break;
+				LeftChild.genCode();
+				RightChild.genCode();
+				System.out.println("compare less or equal" + type); 
+				break;
 			case equal: 
-				System.out.println("compare equal " + type); break;
+				LeftChild.genCode();
+				RightChild.genCode();
+				System.out.println("compare equal " + type); 
+				break;
 			case notEqual: 
-				System.out.println("compare notEqual " + type); break;
+				LeftChild.genCode();
+				RightChild.genCode();
+				System.out.println("compare notEqual " + type); 
+				break;
 			case greater: 
-				System.out.println("compare greater " + type); break;
+				LeftChild.genCode();
+				RightChild.genCode();
+				System.out.println("compare greater " + type); 
+				break;
 			case greaterEqual: 
-				System.out.println("compare greaterEqual " + type); break;
+				LeftChild.genCode();
+				RightChild.genCode();
+				System.out.println("compare greaterEqual " + type); 
+				break;
 			}
 		}
+
+	public void branchIfTrue (Label lab) throws ParseException {
+		genCode();
+		System.out.println("Branch if True " + lab);
+	}
+
+	public void branchIfFalse (Label lab) throws ParseException { 
+		genCode();
+		System.out.println("Branch if False " + lab);
+	}
 
 	public int NodeType;
 	public Ast LeftChild;
@@ -207,7 +271,7 @@ class FunctionCallNode extends Ast {
 		while (--i >= 0) {
 			Ast arg = (Ast) args.elementAt(i);
 			arg.genCode();
-			System.out.println("push argument " + arg.type);
+			System.out.println("push argument" + arg.type);
 			}
 
 		fun.genCode();
