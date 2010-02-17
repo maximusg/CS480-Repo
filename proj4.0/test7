@@ -1,0 +1,13 @@
+function foo (i : int, r : real, j : int)
+begin
+	printInt(i);
+end;
+
+function main ()
+const i = 3;
+var x : int;
+begin
+		{ see if derefs are put in properly }
+	x = i + x;
+	foo (i << 2, 3.13, x*3);
+end;

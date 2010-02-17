@@ -1,0 +1,22 @@
+function isqrt (r : int) : int
+var low : int;
+var high : int;
+var mid : int;
+begin
+	low = 0;
+	high = r;
+	while (high != low) 
+	begin
+		mid = (low + high) / 2;
+		if ((mid * mid) > r) 
+			high = mid
+		else
+			low = mid;
+	end;
+	return (low);
+end;
+
+function main ()
+begin
+	printInt(isqrt(104));
+end;
