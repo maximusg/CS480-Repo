@@ -1,8 +1,13 @@
-var x : int;
-function main (i : int)
+function foo (i : int) : int
 begin
-	i = 8;
-	printInt(i);
-	printInt(x);
+	return (i + 1);
+end;
+
+function main ( )
+var j : int;
+var p : ^ int;
+begin
+	j = foo(19);
+	p = new int;
 end;
 

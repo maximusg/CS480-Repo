@@ -1,20 +1,15 @@
 Reading file test6
 Begin function main
-local space 16
-Global a Address to Array 2 to 5 of Integer
-Integer 42
-Integer 2
-do subtraction Integer
-Integer 4
-do multiplication Integer
-do addition Address to Integer
+local space 12
 frame pointer
-Integer -16
-do addition Address to Array 2 to 5 of Integer
-Integer 42
-Integer 2
-do subtraction Integer
-Integer 4
-do multiplication Integer
+Integer -12
+do addition Address to Real
+frame pointer
+Integer -4
 do addition Address to Integer
+dereference Integer
+convert to realReal
+Real 3.14
+do addition Real
+do assignment
 End function main

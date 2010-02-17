@@ -46,7 +46,7 @@ class ParseException extends Exception {
 		"pointer deref on non pointer",		// 38
 		"field on non class",			// 39
 		"subscript on non array",		// 40
-		"index expression not integer type",    // 41
+		"expression not integer type",   	 // 41
 		"unknown name: ",			// 42
 		"expression must be boolean",		// 43
 		"type mismatch",			// 44

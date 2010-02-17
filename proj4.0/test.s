@@ -1,13 +1,28 @@
 Reading file test
-Begin function main
+Begin function foo
 local space 0
 frame pointer
 Integer 8
 do addition Address to Integer
-Global printInt function type
+dereference Integer
+Integer 1
+do addition Integer
+return from function
+End function foo
+Begin function main
+local space 8
 frame pointer
-Integer 8
+Integer -4
 do addition Address to Integer
-Global printInt function type
-Global x Address to Integer
+Integer 19
+push argument Integer
+Global foo function type
+function call Integer
+do assignment
+frame pointer
+Integer -8
+do addition Address to Pointer to Integer
+Integer 4
+new memory Pointer to Integer
+do assignment
 End function main

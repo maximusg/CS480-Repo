@@ -1,7 +1,7 @@
-type a : [ 2 : 4 ] int;
-var b : a;
 function main ()
-var c : a;
+var a : int;
+var r : real;
 begin
-	c[3] = 7;
+		{ should generate an error } 
+	if (a < r) then a = 3;
 end;

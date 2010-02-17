@@ -1,12 +1,7 @@
-type ary : [ 2 : 5 ] int;
-
-var a : ary;
-
 function main ()
-var
-	b : ary;
+var a : int;
+var r : real;
 begin
-	a[1] = 17;
-	b[3] = 23;
+		{ should not generate an error } 
+	r = a + 3.14;
 end;
-

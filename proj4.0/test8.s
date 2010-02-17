@@ -1,2 +1,4 @@
 Reading file test8
-Parse Error ParseException: name redefinition: a
+Begin function main
+local space 0
+Parse Error ParseException: expression must be boolean
