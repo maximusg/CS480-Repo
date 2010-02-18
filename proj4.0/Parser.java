@@ -662,9 +662,12 @@ public class Parser {
 		else if (lex.isIdentifier()) {
 			indexExpression = reference(sym);
 			if (lex.match("(")) {
-				
+				if(!(indexExpression.type instanceof FunctionType)){
+					parseError(45);
+				}
 				lex.nextLex();
-				parameterList(sym);
+				Vector<Ast> result = parameterList(sym);
+				indexExpression = new FunctionCallNode(indexExpression,result);
 				if (! lex.match(")"))
 					parseError(22);
 				lex.nextLex();
