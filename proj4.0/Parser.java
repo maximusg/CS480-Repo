@@ -491,7 +491,7 @@ public class Parser {
 			lex.nextLex();
 			Ast result = relExpression(sym);
 			MustBeBoolean(result);
-			MustBeBoolean(indexExpression);
+			//MustBeBoolean(indexExpression);
 			if(text.equals("and")){
 				indexExpression = new BinaryNode(BinaryNode.and, PrimitiveType.BooleanType, indexExpression, result);
 			}else{
@@ -657,7 +657,8 @@ public class Parser {
 		else if (lex.match("&")) {
 			lex.nextLex();
 			indexExpression = reference(sym);
-			indexExpression = new UnaryNode(UnaryNode.dereference,new PointerType(indexExpression.type),indexExpression);
+			indexExpression.type = new PointerType(addressBaseType(indexExpression.type));
+			//indexExpression = new UnaryNode(UnaryNode.dereference,new PointerType(indexExpression.type),indexExpression);
 			}
 		else if (lex.tokenCategory() == lex.intToken) {
 			indexExpression = new IntegerNode(new Integer(lex.tokenText()));
@@ -688,11 +689,13 @@ public class Parser {
 				lex.nextLex();
 			}else{
 				if(indexExpression.type instanceof AddressType){
-					indexExpression = new UnaryNode(UnaryNode.dereference,((AddressType)indexExpression.type).baseType,indexExpression);
+					//indexExpression = new UnaryNode(UnaryNode.dereference,((AddressType)indexExpression.type).baseType,indexExpression);
+					indexExpression = new UnaryNode(UnaryNode.dereference,addressBaseType(indexExpression.type),indexExpression);
 				}
 			}
 		}else{
-			parseError(33);
+			//parseError(33);
+			throw new ParseException(33, lex.tokenText());
 		}
 		stop("term");
 		return indexExpression;
@@ -730,7 +733,7 @@ public class Parser {
 				}
 			else {
 				lex.nextLex();
-				expression(sym);
+				//expression(sym);
 				Ast indexExpression = expression(sym);
 				Type b = addressBaseType(result.type);
 				if ( !(b instanceof ArrayType) )

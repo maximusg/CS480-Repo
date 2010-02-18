@@ -178,10 +178,10 @@ class ClassSymbolTable implements SymbolTable {
 		{ enterSymbol (new TypeSymbol(name, type)); }
 
 	public void enterVariable (String name, Type type) throws ParseException
-		{ enterSymbol(new OffsetSymbol(name, new AddressType(type), 27)); sz += type.size();  }
+		{ enterSymbol(new OffsetSymbol(name, new AddressType(type), sz)); sz += type.size();  }
 
 	public void enterFunction (String name, FunctionType ft) throws ParseException 
-		{ throw new ParseException(0, "METHODS NOT ALLOWED!"); }
+		{ throw new ParseException(0); }
 
 	private void enterSymbol (Symbol s) throws ParseException {
 		if (sym.containsValue(s))
