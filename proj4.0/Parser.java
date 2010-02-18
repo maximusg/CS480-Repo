@@ -386,7 +386,7 @@ public class Parser {
 		else
 			lex.nextLex();
 		Ast e = expression(sym);
-		if (!(e.type == PrimitiveType.BooleanType))
+		if (!(e.type.equals(PrimitiveType.BooleanType)))
 			throw new ParseException(43, "Expecting boolean");
 		if (! lex.match(")"))
 			throw new ParseException(22);
@@ -417,7 +417,7 @@ public class Parser {
 		else
 			lex.nextLex();
 		Ast e = expression(sym);
-		if (!(e.type == PrimitiveType.BooleanType))
+		if (!(e.type.equals(PrimitiveType.BooleanType)))
 			throw new ParseException(43, "Expecting boolean");
 		
 		if (! lex.match(")"))
@@ -445,7 +445,7 @@ public class Parser {
 			if (!(leftAst.type instanceof AddressType))
 				throw new ParseException(37, "Left ast not an address type");
 			
-			if (!(rightAst.type == ((AddressType)leftAst.type).baseType))
+			if (!(rightAst.type.equals(((AddressType)leftAst.type).baseType)))
 				throw new ParseException(44, "Right ast does not match the basetype of the left ast");
 			
 			CodeGen.genAssign(leftAst, rightAst);
@@ -525,7 +525,7 @@ public class Parser {
 		if (BNresult > 0) {
 			lex.nextLex();
 			Ast result = plusExpression(sym);
-		    if (! (indexExpression.type == result.type)){
+		    if (! (indexExpression.type.equals(result.type))){
 			    parseError(44);
 		     }
 			indexExpression = new BinaryNode(BNresult, PrimitiveType.BooleanType, indexExpression, result);
@@ -553,7 +553,7 @@ public class Parser {
 				result = convertMe(result,indexExpression);
 				isNumeric(indexExpression);
 				isNumeric(result);
-				if(!(result.type == indexExpression.type)){
+				if(!(result.type.equals(indexExpression.type))){
 					parseError(44);
 				}
 				
@@ -608,7 +608,7 @@ public class Parser {
 				result = convertMe(result,indexExpression);
 				isNumeric(indexExpression);
 				isNumeric(result);
-				if(!(result.type == indexExpression.type)){
+				if(!(result.type.equals(indexExpression.type))){
 					parseError(44);
 				}
 				if((s.equals("*"))){
@@ -657,16 +657,19 @@ public class Parser {
 			indexExpression = new UnaryNode(UnaryNode.dereference,new PointerType(indexExpression.type),indexExpression);
 			}
 		else if (lex.tokenCategory() == lex.intToken) {
-			lex.nextLex();
 			indexExpression = new IntegerNode(new Integer(lex.tokenText()));
+			lex.nextLex();
+			
 			}
 		else if (lex.tokenCategory() == lex.realToken) {
-			lex.nextLex();
 			indexExpression = new RealNode(new Double(lex.tokenText()));
+			lex.nextLex();
+			
 			}
 		else if (lex.tokenCategory() == lex.stringToken) {
-			lex.nextLex();
 			indexExpression = new StringNode(new String(lex.tokenText()));
+			lex.nextLex();
+			
 			}
 		else if (lex.isIdentifier()) {
 			indexExpression = reference(sym);

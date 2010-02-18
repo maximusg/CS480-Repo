@@ -1,7 +1,22 @@
-var x : int;
-function main (y : real, y2 : int)
-var z : real;
-var z2 : int;
+function isqrt (r : int) : int
+var low : int;
+var high : int;
+var mid : int;
 begin
-	y = y2;
+	low = 0;
+	high = r;
+	while (high != low) 
+	begin
+		mid = (low + high) / 2;
+		if ((mid * mid) > r) 
+			high = mid
+		else
+			low = mid;
+	end;
+	return (low);
+end;
+
+function main ()
+begin
+	printInt(isqrt(104));
 end;
