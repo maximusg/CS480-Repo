@@ -99,19 +99,20 @@ public class Parser {
 			lex.nextLex();
 			if (! lex.isIdentifier())
 				parseError(27);
+			String s = lex.tokenText();
 			lex.nextLex();
 			if (! lex.match("="))
 				parseError(20);
 			lex.nextLex();
 			if (lex.tokenCategory() == lex.intToken){
 				Ast intVar = new IntegerNode(new Integer(lex.tokenText()));
-				sym.enterConstant(lex.tokenText(), intVar);
+				sym.enterConstant(s, intVar);
 			}else if (lex.tokenCategory() == lex.realToken){
 				Ast realVar = new RealNode(new Double(lex.tokenText()));
-				sym.enterConstant(lex.tokenText(), realVar);
+				sym.enterConstant(s, realVar);
 			}else if (lex.tokenCategory() == lex.stringToken){
 				Ast stringVar = new StringNode(lex.tokenText());
-				sym.enterConstant(lex.tokenText(), stringVar);
+				sym.enterConstant(s, stringVar);
 			}else
 				parseError(31);
 			lex.nextLex();
@@ -387,7 +388,7 @@ public class Parser {
 			lex.nextLex();
 		Ast e = expression(sym);
 		if (!(e.type.equals(PrimitiveType.BooleanType)))
-			throw new ParseException(43, "Expecting boolean");
+			throw new ParseException(43);
 		if (! lex.match(")"))
 			throw new ParseException(22);
 		else
@@ -418,7 +419,7 @@ public class Parser {
 			lex.nextLex();
 		Ast e = expression(sym);
 		if (!(e.type.equals(PrimitiveType.BooleanType)))
-			throw new ParseException(43, "Expecting boolean");
+			throw new ParseException(43);
 		
 		if (! lex.match(")"))
 			throw new ParseException(22);
@@ -443,16 +444,16 @@ public class Parser {
 			lex.nextLex();
 			Ast rightAst = expression(sym);
 			if (!(leftAst.type instanceof AddressType))
-				throw new ParseException(37, "Left ast not an address type");
+				throw new ParseException(37);
 			
 			if (!(rightAst.type.equals(((AddressType)leftAst.type).baseType)))
-				throw new ParseException(44, "Right ast does not match the basetype of the left ast");
+				throw new ParseException(44);
 			
 			CodeGen.genAssign(leftAst, rightAst);
 			}
 		else if (lex.match("(")) {
 			if (!(leftAst.type instanceof FunctionType))
-				throw new ParseException(45, "Left ast is not a function type");
+				throw new ParseException(45);
 			lex.nextLex();
 			Vector<Ast> t = parameterList(sym);
 			if (! lex.match(")"))
@@ -489,6 +490,8 @@ public class Parser {
 			String text = lex.tokenText();
 			lex.nextLex();
 			Ast result = relExpression(sym);
+			MustBeBoolean(result);
+			MustBeBoolean(indexExpression);
 			if(text.equals("and")){
 				indexExpression = new BinaryNode(BinaryNode.and, PrimitiveType.BooleanType, indexExpression, result);
 			}else{
