@@ -409,10 +409,17 @@ public class Parser {
 
 	private void assignOrFunction (SymbolTable sym) throws ParseException {
 		start("assignOrFunction");
-		reference(sym);
+		Ast leftAst = reference(sym);
 		if (lex.match("=")) {
 			lex.nextLex();
-			expression(sym);
+			Ast rightAst = expression(sym);
+			if (!(leftAst.type instanceof AddressType))
+				throw new ParseException(37, "Left ast not an address type");
+			
+			if (!(rightAst.type == ((AddressType)leftAst.type).baseType))
+				throw new ParseException(44, "Right ast does not match the basetype of the left ast");
+			
+			CodeGen.genAssign(leftAst, rightAst);
 			}
 		else if (lex.match("(")) {
 			lex.nextLex();
