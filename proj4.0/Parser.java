@@ -1,3 +1,5 @@
+import java.util.Vector;
+
 //
 //	parser skeleton, CS 480/580, Winter 2001
 //	written by Tim Budd
@@ -422,28 +424,35 @@ public class Parser {
 			CodeGen.genAssign(leftAst, rightAst);
 			}
 		else if (lex.match("(")) {
+			if (!(leftAst.type instanceof FunctionType))
+				throw new ParseException(45, "Left ast is not a function type");
 			lex.nextLex();
-			parameterList(sym);
+			Vector<Ast> t = parameterList(sym);
 			if (! lex.match(")"))
 				parseError(22);
 			lex.nextLex();
-			}
+			FunctionCallNode n = new FunctionCallNode(leftAst, t);
+			CodeGen.genReturn(n);
+		}
 		else
 			parseError(20);
 		stop("assignOrFunction");
-		}
+		
+	}
 
-	private void parameterList (SymbolTable sym) throws ParseException {
+	private Vector<Ast> parameterList (SymbolTable sym) throws ParseException {
 		start("parameterList");
+		Vector<Ast> ret = new Vector<Ast>();
 		if (firstExpression(sym)) {
-			expression(sym);
+			ret.add(expression(sym));
 			while (lex.match(",")) {
 				lex.nextLex();
-				expression(sym);
+				ret.add(expression(sym));
 				}
 			}
 		stop("parameterList");
-		}
+		return ret;
+	}
 
 	private Ast expression (SymbolTable sym) throws ParseException {
 		start("expression");
