@@ -97,38 +97,21 @@ public class Parser {
 			lex.nextLex();
 			if (! lex.isIdentifier())
 				parseError(27);
-			String leftSide = lex.tokenText();
 			lex.nextLex();
 			if (! lex.match("="))
 				parseError(20);
 			lex.nextLex();
-			AddressType t;
-			if(sym.lookupType(leftSide) instanceof AddressType){
-				t = (AddressType)sym.lookupType(leftSide);
-			} else {
-				throw new ParseException(37, "constant declaration, leftside not an addresstype");
-			}
 			if (lex.tokenCategory() == lex.intToken){
-				
-				if (t.baseType == sym.lookupType("int")){
-					Ast intVar = new IntegerNode(new Integer(lex.tokenText()));
-					sym.enterConstant(lex.tokenText(), intVar);
-				} else {
-					throw new ParseException(44, "constant declaration, left side not an int");
-				}
+				Ast intVar = new IntegerNode(new Integer(lex.tokenText()));
+				sym.enterConstant(lex.tokenText(), intVar);
 			}else if (lex.tokenCategory() == lex.realToken){
-				if (t.baseType == sym.lookupType("real")){
-					Ast realVar = new RealNode(new Double(lex.tokenText()));
-					sym.enterConstant(lex.tokenText(), realVar);
-				} else {
-					throw new ParseException(44, "constant declaration, left side not a real");
-				}
+				Ast realVar = new RealNode(new Double(lex.tokenText()));
+				sym.enterConstant(lex.tokenText(), realVar);
 			}else if (lex.tokenCategory() == lex.stringToken){
 				Ast stringVar = new StringNode(lex.tokenText());
 				sym.enterConstant(lex.tokenText(), stringVar);
 			}else
 				parseError(31);
-			
 			lex.nextLex();
 			}
 		else
@@ -426,10 +409,17 @@ public class Parser {
 
 	private void assignOrFunction (SymbolTable sym) throws ParseException {
 		start("assignOrFunction");
-		reference(sym);
+		Ast leftAst = reference(sym);
 		if (lex.match("=")) {
 			lex.nextLex();
-			expression(sym);
+			Ast rightAst = expression(sym);
+			if (!(leftAst.type instanceof AddressType))
+				throw new ParseException(37, "Left ast not an address type");
+			
+			if (!(rightAst.type == ((AddressType)leftAst.type).baseType))
+				throw new ParseException(44, "Right ast does not match the basetype of the left ast");
+			
+			CodeGen.genAssign(leftAst, rightAst);
 			}
 		else if (lex.match("(")) {
 			lex.nextLex();
