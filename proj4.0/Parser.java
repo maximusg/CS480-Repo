@@ -127,7 +127,7 @@ public class Parser {
 		if (lex.match("type")) {
 			lex.nextLex();
 			String s = lex.tokenText();
-			Type result = nameDeclaration(sym);
+			Type result = nameDeclaration(sym).type;
 			sym.enterType (s, result );
 			//lex.nextLex();
 		} else
@@ -140,7 +140,7 @@ public class Parser {
 		if (lex.match("var")) {
 			lex.nextLex();
 			String s = lex.tokenText();
-			Type t = nameDeclaration(sym);
+			Type t = nameDeclaration(sym).type;
 			sym.enterVariable(s,t);
 			}
 		else
@@ -149,7 +149,7 @@ public class Parser {
 		}
 
 
-	private Type nameDeclaration (SymbolTable sym) throws ParseException {
+	private Ast nameDeclaration (SymbolTable sym) throws ParseException {
 
 		start("nameDeclaration");
 		if (! lex.isIdentifier()) 
@@ -162,9 +162,10 @@ public class Parser {
 		if (! lex.match(":"))
 			parseError(19);
 		lex.nextLex();
-		Type result = type(sym);
+		Type t = type(sym);
+		Ast result = new GlobalNode(t,s);
 		if(sym instanceof GlobalSymbolTable)
-			CodeGen.genGlobal(s, result.size());
+			CodeGen.genGlobal(s, t.size());
 		//sym.enterVariable(s,result);
 		stop("nameDeclaration");
 		return result;
@@ -236,11 +237,15 @@ public class Parser {
 	private void argumentList (SymbolTable sym) throws ParseException {
 		start("argumentList");
 		if (lex.isIdentifier()) {
-			nameDeclaration(sym);
+			((FunctionSymbolTable)sym).doingArguments = true;
+			GlobalNode result = (GlobalNode)nameDeclaration(sym);
+			((FunctionSymbolTable)sym).enterVariable(result.name,result.type);
 			while (lex.match(",")) {
 				lex.nextLex();
-				nameDeclaration(sym);
+				result = (GlobalNode)nameDeclaration(sym);
+				((FunctionSymbolTable)sym).enterVariable(result.name,result.type);
 				}
+			((FunctionSymbolTable)sym).doingArguments = false;
 			}
 		stop("argumentList");
 		}
@@ -520,7 +525,7 @@ public class Parser {
 		if (BNresult > 0) {
 			lex.nextLex();
 			Ast result = plusExpression(sym);
-		    if (! indexExpression.type.equals(result.type)){
+		    if (! (indexExpression.type == result.type)){
 			    parseError(44);
 		     }
 			indexExpression = new BinaryNode(BNresult, PrimitiveType.BooleanType, indexExpression, result);
@@ -541,20 +546,23 @@ public class Parser {
 				indexExpression = new BinaryNode(BinaryNode.leftShift, sym.lookupType("int"), indexExpression, result);
 				
 			}else if((lex.match("+"))||(lex.match("-"))){
+				String s = lex.tokenText();
 				lex.nextLex();
 				Ast result = timesExpression(sym);
 				indexExpression = convertMe(indexExpression,result);
 				result = convertMe(result,indexExpression);
 				isNumeric(indexExpression);
 				isNumeric(result);
-				if(((indexExpression.type.equals(PrimitiveType.IntegerType))&&(result.type.equals(PrimitiveType.IntegerType)))||((indexExpression.type.equals(PrimitiveType.RealType))&&(result.type.equals(PrimitiveType.RealType)))){
+				if(!(result.type == indexExpression.type)){
 					parseError(44);
 				}
-				if((lex.match("-"))){
+				
+				if((s.equals("-"))){
 					indexExpression = new BinaryNode(BinaryNode.minus, indexExpression.type, indexExpression, result);
 				}else{
 					indexExpression = new BinaryNode(BinaryNode.plus, indexExpression.type, indexExpression, result);
 				}
+				
 			}
 			
 			
@@ -593,16 +601,17 @@ public class Parser {
 				indexExpression = new BinaryNode(BinaryNode.remainder, PrimitiveType.IntegerType, indexExpression, result);
 				
 			}else if((lex.match("*"))||(lex.match("/"))){
+				String s = lex.tokenText();
 				lex.nextLex();
 				Ast result = term(sym);	
 				indexExpression = convertMe(indexExpression,result);
 				result = convertMe(result,indexExpression);
 				isNumeric(indexExpression);
 				isNumeric(result);
-				if(((indexExpression.type.equals(PrimitiveType.IntegerType))&&(result.type.equals(PrimitiveType.IntegerType)))||((indexExpression.type.equals(PrimitiveType.RealType))&&(result.type.equals(PrimitiveType.RealType)))){
+				if(!(result.type == indexExpression.type)){
 					parseError(44);
 				}
-				if((lex.match("*"))){
+				if((s.equals("*"))){
 					indexExpression = new BinaryNode(BinaryNode.times, indexExpression.type, indexExpression, result);
 				}else{
 					indexExpression = new BinaryNode(BinaryNode.divide, indexExpression.type, indexExpression, result);
@@ -716,7 +725,7 @@ public class Parser {
 			else {
 				lex.nextLex();
 				expression(sym);
-				Ast indexExpression = new IntegerNode(42);
+				Ast indexExpression = expression(sym);
 				Type b = addressBaseType(result.type);
 				if ( !(b instanceof ArrayType) )
 					parseError(40);
