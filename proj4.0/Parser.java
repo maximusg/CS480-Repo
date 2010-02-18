@@ -359,13 +359,15 @@ public class Parser {
 		if (! lex.match("return"))
 			parseError(12);
 		lex.nextLex();
+		Ast e = null;
 		if (lex.match("(")) {
 			lex.nextLex();
-			expression(sym);
+			e = expression(sym);
 			if (! lex.match(")"))
 				parseError(22);
 			lex.nextLex();
-			}
+		}
+		CodeGen.genReturn(e);
 		stop("returnStatement");
 		}
 
@@ -378,18 +380,27 @@ public class Parser {
 			throw new ParseException(21);
 		else
 			lex.nextLex();
-		expression(sym);
+		Ast e = expression(sym);
+		if (!(e.type == PrimitiveType.BooleanType))
+			throw new ParseException(43, "Expecting boolean");
 		if (! lex.match(")"))
 			throw new ParseException(22);
 		else
 			lex.nextLex();
+		Label l1 = new Label();
+		Label l2 = new Label();
+		e.branchIfFalse(l1);
 		statement(sym);
+		l2.genBranch();
+		l1.genCode();
+		
 		if (lex.match("else")) {
 			lex.nextLex();
 			statement(sym);
-			}
-		stop("ifStatement");
+			l2.genCode();
 		}
+		stop("ifStatement");
+	}
 
 	private void whileStatement (SymbolTable sym) throws ParseException {
 		start("whileStatement");
@@ -400,14 +411,25 @@ public class Parser {
 			throw new ParseException(21);
 		else
 			lex.nextLex();
-		expression(sym);
+		Ast e = expression(sym);
+		if (!(e.type == PrimitiveType.BooleanType))
+			throw new ParseException(43, "Expecting boolean");
+		
 		if (! lex.match(")"))
 			throw new ParseException(22);
 		else
 			lex.nextLex();
+		Label l1 = new Label();
+		Label l2 = new Label();
+		l1.genCode();
+		e.branchIfFalse(l2);
+		
 		statement(sym);
+		l1.genBranch();
+		l2.genCode();
+		
 		stop("whileStatement");
-		}
+	}
 
 	private void assignOrFunction (SymbolTable sym) throws ParseException {
 		start("assignOrFunction");
@@ -432,7 +454,7 @@ public class Parser {
 				parseError(22);
 			lex.nextLex();
 			FunctionCallNode n = new FunctionCallNode(leftAst, t);
-			CodeGen.genReturn(n);
+			n.genCode();
 		}
 		else
 			parseError(20);
