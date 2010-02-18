@@ -682,32 +682,76 @@ public class Parser {
 
 	private Ast reference (SymbolTable sym) throws ParseException {
 		start("reference");
-		Ast indexExpression = null;
+		Ast result = null;
 		if (! lex.isIdentifier())
 			parseError(27);
+		result = sym.lookupName(new FramePointer(), lex.tokenText());
 		lex.nextLex();
 		while (lex.match("^") || lex.match(".") || lex.match("[")) {
 			if (lex.match("^")) {
+				Type b = addressBaseType(result.type);
+				if ( !(b instanceof PointerType) )
+					parseError(38);
+				PointerType pb = (PointerType) b;
+				result = new UnaryNode(UnaryNode.dereference,
+					new AddressType(pb.baseType), result);
 				lex.nextLex();
 				}
 			else if (lex.match(".")) {
 				lex.nextLex();
 				if (! lex.isIdentifier())
 					parseError(27);
+				Type b = addressBaseType(result.type);
+				if ( !(b instanceof ClassType) )
+					parseError(39);
+				ClassType pb = (ClassType) b;
+				if (! pb.symbolTable.nameDefined(lex.tokenText()))
+				   throw new ParseException(29);
+				result = pb.symbolTable.lookupName(result, lex.tokenText());
 				lex.nextLex();
 				}
 			else {
 				lex.nextLex();
-				indexExpression = expression(sym);
+				expression(sym);
+				Ast indexExpression = new IntegerNode(42);
+				Type b = addressBaseType(result.type);
+				if ( !(b instanceof ArrayType) )
+					parseError(40);
+				ArrayType at = (ArrayType) b;
+				if (! indexExpression.type.equals(
+					PrimitiveType.IntegerType))
+						parseError(41);
+				indexExpression = new BinaryNode(
+					BinaryNode.minus, 
+					PrimitiveType.IntegerType,
+					indexExpression, 
+						new IntegerNode(at.lowerBound));
+				indexExpression = new BinaryNode(
+					BinaryNode.times, 
+					PrimitiveType.IntegerType,
+					indexExpression, 
+						new IntegerNode(at.elementType.size()));
+				result = new BinaryNode(
+					BinaryNode.plus, 
+					new AddressType(at.elementType),
+					result,
+					indexExpression);
 				if (! lex.match("]"))
 					parseError(24);
 				lex.nextLex();
 				}
 			}
-		
 		stop("reference");
-		return indexExpression;
+		return result;
 		}
+
+	private Type addressBaseType(Type t) throws ParseException {
+		if (! (t instanceof AddressType))
+			parseError(37);
+		AddressType at = (AddressType) t;
+		return at.baseType;
+	}
+
 
 	private void MustBeBoolean(Ast a) throws ParseException{
 		if(!a.type.equals(PrimitiveType.BooleanType)){
