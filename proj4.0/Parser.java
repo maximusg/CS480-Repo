@@ -511,13 +511,52 @@ public class Parser {
 		start("plusExpression");
 		Ast indexExpression = timesExpression(sym);
 		while (lex.match("+") || lex.match("-") || lex.match("<<")) {
-			lex.nextLex();
-			indexExpression = timesExpression(sym);
+			if(lex.match("<<")){
+				lex.nextLex();
+				Ast result = timesExpression(sym);
+				isNumeric(indexExpression);
+				isNumeric(result);
+				indexExpression = new BinaryNode(BinaryNode.leftShift, sym.lookupType("int"), indexExpression, result);
+				
+			}else if((lex.match("+"))||(lex.match("-"))){
+				lex.nextLex();
+				Ast result = timesExpression(sym);
+				if((indexExpression.equals(sym.lookupType("int")))&& (result.equals(sym.lookupType("real")))){
+					indexExpression = new UnaryNode(UnaryNode.convertToReal,sym.lookupType("real"),indexExpression);
+				}else if(result.equals(sym.lookupType("int"))&&(indexExpression.equals(sym.lookupType("real")))){
+					result = new UnaryNode(UnaryNode.convertToReal,sym.lookupType("real"),result);
+				}
+				isNumeric(indexExpression);
+				isNumeric(result);
+				if(((indexExpression.type.equals(PrimitiveType.IntegerType))&&(result.type.equals(PrimitiveType.IntegerType)))||((indexExpression.type.equals(PrimitiveType.RealType))&&(result.type.equals(PrimitiveType.RealType)))){
+					parseError(44);
+				}
+				if((lex.match("-"))){
+					indexExpression = new BinaryNode(BinaryNode.minus, indexExpression.type, indexExpression, result);
+				}else{
+					indexExpression = new BinaryNode(BinaryNode.plus, indexExpression.type, indexExpression, result);
+				}
+			}
+			
+			
 			}
 		stop("plusExpression");
 		return indexExpression;
 		}
 
+	private void isInteger(Ast test)throws ParseException{
+		if(!(test.type.equals(PrimitiveType.IntegerType) )){
+			parseError(41);
+		}	
+	}
+	
+	private void isNumeric(Ast test) throws ParseException{
+		if(!(test.type.equals(PrimitiveType.IntegerType) )&&(!test.type.equals(PrimitiveType.RealType))){
+			parseError(46);
+		}
+		
+	}
+	
 	private Ast timesExpression (SymbolTable sym) throws ParseException {
 		start("timesExpression");
 		Ast indexExpression = term(sym);
