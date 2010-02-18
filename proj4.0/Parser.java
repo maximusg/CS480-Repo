@@ -536,18 +536,15 @@ public class Parser {
 			if(lex.match("<<")){
 				lex.nextLex();
 				Ast result = timesExpression(sym);
-				isNumeric(indexExpression);
-				isNumeric(result);
+				isInteger(indexExpression);
+				isInteger(result);
 				indexExpression = new BinaryNode(BinaryNode.leftShift, sym.lookupType("int"), indexExpression, result);
 				
 			}else if((lex.match("+"))||(lex.match("-"))){
 				lex.nextLex();
 				Ast result = timesExpression(sym);
-				if((indexExpression.equals(sym.lookupType("int")))&& (result.equals(sym.lookupType("real")))){
-					indexExpression = new UnaryNode(UnaryNode.convertToReal,sym.lookupType("real"),indexExpression);
-				}else if(result.equals(sym.lookupType("int"))&&(indexExpression.equals(sym.lookupType("real")))){
-					result = new UnaryNode(UnaryNode.convertToReal,sym.lookupType("real"),result);
-				}
+				indexExpression = convertMe(indexExpression,result);
+				result = convertMe(result,indexExpression);
 				isNumeric(indexExpression);
 				isNumeric(result);
 				if(((indexExpression.type.equals(PrimitiveType.IntegerType))&&(result.type.equals(PrimitiveType.IntegerType)))||((indexExpression.type.equals(PrimitiveType.RealType))&&(result.type.equals(PrimitiveType.RealType)))){
@@ -565,7 +562,12 @@ public class Parser {
 		stop("plusExpression");
 		return indexExpression;
 		}
-
+	private Ast convertMe(Ast a,Ast b){
+		if((a.type.equals(PrimitiveType.IntegerType))&& (b.type.equals(PrimitiveType.RealType))){
+			a = new UnaryNode(UnaryNode.convertToReal,PrimitiveType.RealType,a);
+		}
+		return a;
+	}
 	private void isInteger(Ast test)throws ParseException{
 		if(!(test.type.equals(PrimitiveType.IntegerType) )){
 			parseError(41);
@@ -583,9 +585,31 @@ public class Parser {
 		start("timesExpression");
 		Ast indexExpression = term(sym);
 		while (lex.match("*") || lex.match("/") || lex.match("%")) {
-			lex.nextLex();
-			indexExpression = term(sym);
+			if(lex.match("%")){
+				lex.nextLex();
+				Ast result = term(sym);
+				isInteger(indexExpression);
+				isInteger(result);
+				indexExpression = new BinaryNode(BinaryNode.remainder, PrimitiveType.IntegerType, indexExpression, result);
+				
+			}else if((lex.match("*"))||(lex.match("/"))){
+				lex.nextLex();
+				Ast result = term(sym);	
+				indexExpression = convertMe(indexExpression,result);
+				result = convertMe(result,indexExpression);
+				isNumeric(indexExpression);
+				isNumeric(result);
+				if(((indexExpression.type.equals(PrimitiveType.IntegerType))&&(result.type.equals(PrimitiveType.IntegerType)))||((indexExpression.type.equals(PrimitiveType.RealType))&&(result.type.equals(PrimitiveType.RealType)))){
+					parseError(44);
+				}
+				if((lex.match("*"))){
+					indexExpression = new BinaryNode(BinaryNode.times, indexExpression.type, indexExpression, result);
+				}else{
+					indexExpression = new BinaryNode(BinaryNode.divide, indexExpression.type, indexExpression, result);
+				}
 			}
+
+		}
 		stop("timesExpression");
 		return indexExpression;
 		}
@@ -602,22 +626,30 @@ public class Parser {
 			}
 		else if (lex.match("not")) {
 			lex.nextLex();
-			term(sym);
+			indexExpression = term(sym);
+			MustBeBoolean(indexExpression);
+			indexExpression = new UnaryNode(UnaryNode.notOp,indexExpression.type,indexExpression);
 			}
 		else if (lex.match("new")) {
 			lex.nextLex();
-			type(sym);
+			Type t = type(sym);
+			int size = t.size();
+			indexExpression = new UnaryNode(UnaryNode.newOp,new PointerType(t),new IntegerNode(size));
 			}
 		else if (lex.match("-")) {
 			lex.nextLex();
-			term(sym);
+			indexExpression = term(sym);
+			isNumeric(indexExpression);
+			indexExpression = new UnaryNode(UnaryNode.negation,indexExpression.type,indexExpression);
 			}
 		else if (lex.match("&")) {
 			lex.nextLex();
-			reference(sym);
+			indexExpression = reference(sym);
+			indexExpression = new UnaryNode(UnaryNode.dereference,new PointerType(indexExpression.type),indexExpression);
 			}
 		else if (lex.tokenCategory() == lex.intToken) {
 			lex.nextLex();
+			indexExpression = new IntegerNode(new Integer(lex.tokenText()));
 			}
 		else if (lex.tokenCategory() == lex.realToken) {
 			lex.nextLex();
