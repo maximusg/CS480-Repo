@@ -631,22 +631,29 @@ public class Parser {
 			}
 		else if (lex.tokenCategory() == lex.realToken) {
 			lex.nextLex();
+			indexExpression = new RealNode(new Double(lex.tokenText()));
 			}
 		else if (lex.tokenCategory() == lex.stringToken) {
 			lex.nextLex();
+			indexExpression = new StringNode(new String(lex.tokenText()));
 			}
 		else if (lex.isIdentifier()) {
-			reference(sym);
+			indexExpression = reference(sym);
 			if (lex.match("(")) {
+				
 				lex.nextLex();
 				parameterList(sym);
 				if (! lex.match(")"))
 					parseError(22);
 				lex.nextLex();
+			}else{
+				if(indexExpression.type instanceof AddressType){
+					indexExpression = new UnaryNode(UnaryNode.dereference,((AddressType)indexExpression.type).baseType,indexExpression);
 				}
 			}
-		else
+		}else{
 			parseError(33);
+		}
 		stop("term");
 		return indexExpression;
 		}
