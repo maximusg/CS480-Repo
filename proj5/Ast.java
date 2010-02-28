@@ -116,7 +116,14 @@ class UnaryNode extends Ast {
 	static final int negation = 4;
 	static final int newOp = 5;
 
-	public Ast optimize() { return this; }
+	public Ast optimize() {
+		Ast ret = this;
+		child.optimize();
+		if (nodeType == negation && child.isIntegerConstant()){
+			child = new IntegerNode(child.getConstIntVal()*-1);
+		}
+		return ret;
+	}
 	
 	public UnaryNode (int nt, Type t, Ast b) { 
 		super(t); 
