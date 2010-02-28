@@ -440,7 +440,7 @@ public class Parser {
 			Type lt = addressBaseType(val.type);
 			if (! lt.equals(right.type))
 				parseError(44);
-			CodeGen.genAssign(val, right);
+			CodeGen.genAssign(val.optimize(), right.optimize());
 			}
 		else if (lex.match("(")) {
 			if (! (val.type instanceof FunctionType))
