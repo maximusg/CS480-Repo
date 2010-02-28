@@ -1,0 +1,5 @@
+function main ()
+begin
+	printInt ((2 + 3 * 7) * 0);
+end;
+

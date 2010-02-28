@@ -1,0 +1,12 @@
+class a
+begin
+	var b : int;
+	var c : int;
+end;
+var j : int;
+
+function main ()
+	var d : [ 2 : 7 ] a;
+begin
+	d[4+j].c = 7;
+end;

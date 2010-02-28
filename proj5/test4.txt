@@ -1,0 +1,6 @@
+var i : int;
+function main () 
+begin
+	printInt(i);
+end;
+

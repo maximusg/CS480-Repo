@@ -1,0 +1,18 @@
+var a : int;
+var b : int;
+function main ()
+begin
+	printInt(-3);
+	printInt(a+0);
+	printInt(3+4);
+	printInt(3+a);
+	printInt((a+3)+4);
+	printInt((a+3)+b);
+	printInt(a+(b+3));
+	printInt(a-3);
+	printInt(a*0);
+	printInt(a*1);
+	printInt(3*4);
+	printInt((a+3)*4);
+end;
+
