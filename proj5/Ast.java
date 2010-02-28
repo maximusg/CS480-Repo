@@ -5,6 +5,9 @@
 import java.util.Vector;
 
 abstract class Ast {
+	
+	public Ast optimize() { return this; }
+	
 	public Ast(Type t) { type = t; }
 
 	public Type type;
@@ -213,4 +216,5 @@ class FunctionCallNode extends Ast {
 		fun.genCode();
 		System.out.println("function call " + type);
 	}
+
 }
