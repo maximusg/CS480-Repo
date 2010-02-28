@@ -116,7 +116,8 @@ class UnaryNode extends Ast {
 	static final int negation = 4;
 	static final int newOp = 5;
 
-
+	public Ast optimize() { return this; }
+	
 	public UnaryNode (int nt, Type t, Ast b) { 
 		super(t); 
 		nodeType = nt;
