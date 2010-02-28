@@ -28,11 +28,8 @@ abstract class Ast {
 		return (this instanceof IntegerNode);
 	}
 	
-	protected int getConstIntVal() throws ParseException{
-		if (this.isIntegerConstant())
-			return ((IntegerNode)this).val;
-		else
-			throw new ParseException(32);
+	protected int getConstIntVal() {
+		return ((IntegerNode)this).val;
 	}
 	
 	protected BinaryNode isAddition() {
