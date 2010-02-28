@@ -25,8 +25,7 @@ abstract class Ast {
 	}
 	
 	protected boolean isIntegerConstant() {
-		
-		return true;
+		return (this instanceof IntegerNode);
 	}
 	
 	protected int getConstIntVal() {
