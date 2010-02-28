@@ -1,5 +1,6 @@
 //
 //	written (and rewritten) by Tim Budd
+//  Edited by Rich Tracy, Brad Kessler, Sarah Clisby, Max Geiszler
 //
 
 import java.util.*;
