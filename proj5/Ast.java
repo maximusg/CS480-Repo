@@ -25,16 +25,21 @@ abstract class Ast {
 	}
 	
 	protected boolean isIntegerConstant() {
-		
-		return true;
+		return (this instanceof IntegerNode);
 	}
 	
-	protected int getConstIntVal() {
-		return 1;
+	protected int getConstIntVal() throws ParseException{
+		if (this.isIntegerConstant())
+			return ((IntegerNode)this).val;
+		else
+			throw new ParseException(32);
 	}
 	
 	protected BinaryNode isAddition() {
-		return new BinaryNode(1, this.type, this, this);
+		if((((BinaryNode)this).NodeType == (BinaryNode.plus))){
+			return new BinaryNode(BinaryNode.plus, this.type, this, this);
+		}
+		return null;
 	}
 	
 }
