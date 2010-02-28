@@ -363,7 +363,7 @@ public class Parser {
 				parseError(22);
 			lex.nextLex();
 			}
-		CodeGen.genReturn(result);
+		CodeGen.genReturn(result.optimize());
 		stop("returnStatement");
 		}
 
