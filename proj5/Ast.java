@@ -15,12 +15,12 @@ abstract class Ast {
 	abstract public void genCode ();
 
 	public void branchIfTrue (Label lab) throws ParseException {
-		genCode();
+		optimize().genCode();
 		System.out.println("Branch if True " + lab);
 	}
 
 	public void branchIfFalse (Label lab) throws ParseException { 
-		genCode();
+		optimize().genCode();
 		System.out.println("Branch if False " + lab);
 	}
 	
