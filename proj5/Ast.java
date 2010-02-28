@@ -34,7 +34,10 @@ abstract class Ast {
 	}
 	
 	protected BinaryNode isAddition() {
-		return new BinaryNode(1, this.type, this, this);
+		if((((BinaryNode)this).NodeType == (BinaryNode.plus))){
+			return new BinaryNode(BinaryNode.plus, this.type, this, this);
+		}
+		return null;
 	}
 	
 }
