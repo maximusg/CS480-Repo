@@ -23,6 +23,20 @@ abstract class Ast {
 		genCode();
 		System.out.println("Branch if False " + lab);
 	}
+	
+	protected boolean isIntegerConstant() {
+		
+		return true;
+	}
+	
+	protected int getConstIntVal() {
+		return 1;
+	}
+	
+	protected BinaryNode isAddition() {
+		return new BinaryNode(1, this.type, this, this);
+	}
+	
 }
 
 class GlobalNode extends Ast {
