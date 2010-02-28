@@ -218,6 +218,10 @@ class BinaryNode extends Ast {
 class FunctionCallNode extends Ast {
 	private Ast fun;
 	protected Vector args;
+	
+	public Ast optimize() {
+		return this;
+	}
 
 	public FunctionCallNode (Ast f, Vector a) {
 		super (((FunctionType) f.type).returnType);
