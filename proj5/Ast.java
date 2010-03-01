@@ -202,6 +202,9 @@ class BinaryNode extends Ast {
 			if ((r.NodeType == plus) && (!(r.LeftChild.isIntegerConstant())) && (r.RightChild.isIntegerConstant())){
 				return (new BinaryNode(NodeType,type,new BinaryNode(NodeType,type,left,r.LeftChild),r.RightChild)).optimize();
 			}
+		}else if((this.NodeType == minus) && (!left.isIntegerConstant()) && right.isIntegerConstant()){//t-c
+			UnaryNode nr = (new UnaryNode(UnaryNode.negation,right.type,right));
+			return (new BinaryNode(plus,type,left,nr)).optimize();
 		}
 		
 		if((this.NodeType == times) && (right.isIntegerConstant()) && (right.getConstIntVal() == 0) && (!(left.isIntegerConstant()))){
