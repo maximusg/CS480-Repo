@@ -180,7 +180,10 @@ class BinaryNode extends Ast {
 		Ast left = LeftChild.optimize();
 		Ast right = RightChild.optimize();
 		
-		
+		if((this.NodeType == plus) && (right.isIntegerConstant()) && (right.getConstIntVal() == 0) ){
+			left.type = this.type;
+			return left;
+		}
 		
 		return new BinaryNode(NodeType,type,left,right); 
 		}
