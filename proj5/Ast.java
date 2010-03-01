@@ -177,7 +177,7 @@ class BinaryNode extends Ast {
 	public Ast optimize() { 
 		Ast left = LeftChild.optimize();
 		Ast right = RightChild.optimize();
-		
+
 		//t + 0
 		if((this.NodeType == plus) && 
 				(right.isIntegerConstant()) && 
@@ -329,8 +329,8 @@ class FunctionCallNode extends Ast {
 	
 	public Ast optimize() {
 		Vector rgs = new Vector();
-		for(int i = 0; i < args.capacity(); i++){
-			rgs.add(((Ast)args.elementAt(i)).optimize());
+		for(Object arg : args){
+			rgs.add(((Ast)arg).optimize());
 		}
 		args = rgs;
 		return this;
@@ -340,7 +340,7 @@ class FunctionCallNode extends Ast {
 		super (((FunctionType) f.type).returnType);
 		fun = f;
 		args = a;
-		}
+	}
 
 	public String toString() { return "Function Call Node"; }
 

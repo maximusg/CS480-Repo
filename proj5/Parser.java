@@ -450,7 +450,7 @@ public class Parser {
 			if (! lex.match(")"))
 				parseError(22);
 			lex.nextLex();
-			val = new FunctionCallNode(val, args);
+			val = (new FunctionCallNode(val, args)).optimize();
 			val.genCode();
 			}
 		else
@@ -659,7 +659,7 @@ public class Parser {
 					parseError(45);
 				lex.nextLex();
 				Vector args = parameterList(sym);
-				result = new FunctionCallNode(result, args);
+				result = (new FunctionCallNode(result, args)).optimize();
 				if (! lex.match(")"))
 					parseError(22);
 				lex.nextLex();
