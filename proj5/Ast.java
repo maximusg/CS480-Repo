@@ -177,8 +177,12 @@ class BinaryNode extends Ast {
 		}
 
 	public Ast optimize() { 
+		Ast left = LeftChild.optimize();
+		Ast right = RightChild.optimize();
 		
-		return this; 
+		
+		
+		return new BinaryNode(NodeType,type,left,right); 
 		}
 	
 	public String toString() { return "Binary Node " + NodeType +
