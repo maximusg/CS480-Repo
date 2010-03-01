@@ -211,6 +211,11 @@ class BinaryNode extends Ast {
 			return left;
 		}else if((this.NodeType == times) && (left.isIntegerConstant()) && (right.isIntegerConstant())){//c*c
 			return new IntegerNode(new Integer(left.getConstIntVal()) * right.getConstIntVal());
+		}else if((this.NodeType == times) && (right.isIntegerConstant()) && (left instanceof BinaryNode)){//(t+c1)*c2
+			BinaryNode l = (BinaryNode)left;
+			if((!l.LeftChild.isIntegerConstant()) && (l.RightChild.isIntegerConstant()) && (l.NodeType == plus)){
+				return (new BinaryNode(plus,type,new BinaryNode(times,type,l.LeftChild, right),new BinaryNode(times,type,l.RightChild,right))).optimize();
+			}
 		}
 
 		return new BinaryNode(NodeType,type,left,right); 
