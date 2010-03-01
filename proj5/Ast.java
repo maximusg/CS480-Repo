@@ -208,6 +208,10 @@ class BinaryNode extends Ast {
 		}else if((this.NodeType == times) && (right.isIntegerConstant()) && (right.getConstIntVal() == 0) && (!(left.isIntegerConstant()))){
 			return new IntegerNode(new Integer(0));
 		}
+		
+		if((this.NodeType == times) && (left.isIntegerConstant()) && (right.isIntegerConstant())){
+			return new IntegerNode(new Integer(left.getConstIntVal()) * right.getConstIntVal());
+		}
 		return new BinaryNode(NodeType,type,left,right); 
 	}
 	
