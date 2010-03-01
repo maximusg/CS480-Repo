@@ -114,14 +114,12 @@ class UnaryNode extends Ast {
 	static final int newOp = 5;
 
 	public Ast optimize() {
-		child = child.optimize();
 		if (nodeType == negation && child.isIntegerConstant()){
 			return new IntegerNode(child.getConstIntVal()*-1);
 		} else {
 			child = child.optimize();
+			return this;
 		}
-		
-		return new UnaryNode(this.nodeType, this.type, this.child);
 	}
 	
 	public UnaryNode (int nt, Type t, Ast b) { 
@@ -186,16 +184,19 @@ class BinaryNode extends Ast {
 				(right.getConstIntVal() == 0) ){
 			left.type = this.type;
 			return left;
+			
 		//c + c
 		}else if((this.NodeType == plus) && 
 				(right.isIntegerConstant()) && 
 				(left.isIntegerConstant())){
 			return new IntegerNode(new Integer(left.getConstIntVal() + right.getConstIntVal()));
+		
 		//c + t
 		}else if((this.NodeType == plus) && 
 				(left.isIntegerConstant()) && 
 				!(right.isIntegerConstant())){
 			return new BinaryNode(NodeType,type,right,left);
+			
 		//(t+c) + c
 		}else if((this.NodeType == plus) && 
 				(left.isIntegerConstant()) && 
@@ -208,6 +209,7 @@ class BinaryNode extends Ast {
 						l.LeftChild,
 						new IntegerNode(new Integer(right.getConstIntVal() + l.RightChild.getConstIntVal())));
 			}
+			
 		//(t+c) + t2
 		}else if((this.NodeType == plus) && 
 				(!right.isIntegerConstant()) && 
@@ -220,6 +222,7 @@ class BinaryNode extends Ast {
 						new BinaryNode(NodeType,type,l.LeftChild,right),
 						l.RightChild)).optimize();
 			}
+			
 		//t+(t2+c)
 		}else if((this.NodeType == plus) && 
 				(!left.isIntegerConstant()) && 
@@ -232,29 +235,34 @@ class BinaryNode extends Ast {
 						new BinaryNode(NodeType,type,left,r.LeftChild),
 						r.RightChild)).optimize();
 			}
+			
 		//t-c
 		}else if((this.NodeType == minus) && 
 				(!left.isIntegerConstant()) && 
 				right.isIntegerConstant()){
 			UnaryNode nr = (new UnaryNode(UnaryNode.negation,right.type,right));
 			return (new BinaryNode(plus,type,left,nr)).optimize();
+			
 		//t*0
 		}else if((this.NodeType == times) && 
 				(right.isIntegerConstant()) && 
 				(right.getConstIntVal() == 0) && 
 				(!(left.isIntegerConstant()))){
 			return new IntegerNode(new Integer(0));
+			
 		//t*1
 		}else if((this.NodeType == times) && 
 				(right.isIntegerConstant()) && 
 				(right.getConstIntVal() == 1) && 
 				(!left.isIntegerConstant())){
 			return left;
+			
 		//c*c
 		}else if((this.NodeType == times) && 
 				(left.isIntegerConstant()) && 
 				(right.isIntegerConstant())){
 			return new IntegerNode(new Integer(left.getConstIntVal()) * right.getConstIntVal());
+			
 		//(t+c1)*c2
 		}else if((this.NodeType == times) && 
 				(right.isIntegerConstant()) && 
