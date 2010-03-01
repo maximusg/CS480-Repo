@@ -176,7 +176,10 @@ class BinaryNode extends Ast {
 		RightChild = r;
 		}
 
-	public Ast optimize() { return this; }
+	public Ast optimize() { 
+		
+		return this; 
+		}
 	
 	public String toString() { return "Binary Node " + NodeType +
 		"(" + LeftChild + "," + RightChild + ")" + type; }
