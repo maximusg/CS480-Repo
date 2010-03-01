@@ -172,7 +172,8 @@ class BinaryNode extends Ast {
 		NodeType = nt;
 		LeftChild = l;
 		RightChild = r;
-		}
+		
+	}
 
 	public Ast optimize() { 
 		Ast left = LeftChild.optimize();
@@ -185,12 +186,15 @@ class BinaryNode extends Ast {
 			left.type = this.type;
 			return left;
 			
-		//c + c
-		}else if((this.NodeType == plus) && 
-				(right.isIntegerConstant()) && 
+		//c + c, c - c, c * c
+		}else if((right.isIntegerConstant()) && 
 				(left.isIntegerConstant())){
-			return new IntegerNode(new Integer(left.getConstIntVal() + right.getConstIntVal()));
-		
+			if (NodeType == plus)
+				return new IntegerNode(new Integer(left.getConstIntVal() + right.getConstIntVal()));
+			if (NodeType == minus)
+				return new IntegerNode(new Integer(left.getConstIntVal() - right.getConstIntVal()));
+			if (NodeType == times)
+				return new IntegerNode(new Integer(left.getConstIntVal() * right.getConstIntVal()));
 		//c + t
 		}else if((this.NodeType == plus) && 
 				(left.isIntegerConstant()) && 
@@ -256,13 +260,6 @@ class BinaryNode extends Ast {
 				(right.getConstIntVal() == 1) && 
 				(!left.isIntegerConstant())){
 			return left;
-			
-		//c*c
-		}else if((this.NodeType == times) && 
-				(left.isIntegerConstant()) && 
-				(right.isIntegerConstant())){
-			return new IntegerNode(new Integer(left.getConstIntVal()) * right.getConstIntVal());
-			
 		//(t+c1)*c2
 		}else if((this.NodeType == times) && 
 				(right.isIntegerConstant()) && 
