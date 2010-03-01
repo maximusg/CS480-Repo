@@ -199,7 +199,7 @@ class BinaryNode extends Ast {
 			
 		//(t+c) + c
 		}else if((this.NodeType == plus) && 
-				(left.isIntegerConstant()) && 
+				(right.isIntegerConstant()) && 
 				(left instanceof BinaryNode)){
 			BinaryNode l = (BinaryNode)left;
 			if((l.NodeType == plus) && 
