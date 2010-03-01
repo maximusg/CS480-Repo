@@ -204,6 +204,9 @@ class BinaryNode extends Ast {
 			}
 		}
 		
+		if((this.NodeType == times) && (right.isIntegerConstant()) && (right.getConstIntVal() == 0) && (!(left.isIntegerConstant()))){
+			
+		}
 		return new BinaryNode(NodeType,type,left,right); 
 	}
 	
