@@ -195,12 +195,12 @@ class BinaryNode extends Ast {
 		}else if((this.NodeType == plus) && (!right.isIntegerConstant()) && (left instanceof BinaryNode)){//(t+c) + t2
 			BinaryNode l = (BinaryNode)left;
 			if ((l.NodeType == plus) && (l.RightChild.isIntegerConstant()) && (!l.LeftChild.isIntegerConstant())){
-				return new BinaryNode(NodeType,type,new BinaryNode(NodeType,type,l.LeftChild,right),l.RightChild);
+				return (new BinaryNode(NodeType,type,new BinaryNode(NodeType,type,l.LeftChild,right),l.RightChild)).optimize();
 			}
 		}else if((this.NodeType == plus) && (!left.isIntegerConstant()) && (right instanceof BinaryNode)){//t+(t2+c)
 			BinaryNode r = (BinaryNode)right;
 			if ((r.NodeType == plus) && (!(r.LeftChild.isIntegerConstant())) && (r.RightChild.isIntegerConstant())){
-				return new BinaryNode(NodeType,type,new BinaryNode(NodeType,type,left,r.LeftChild),r.RightChild);
+				return (new BinaryNode(NodeType,type,new BinaryNode(NodeType,type,left,r.LeftChild),r.RightChild)).optimize();
 			}
 		}
 		
