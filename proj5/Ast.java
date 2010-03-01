@@ -114,10 +114,10 @@ class UnaryNode extends Ast {
 	static final int newOp = 5;
 
 	public Ast optimize() {
+		child = child.optimize();
 		if (nodeType == negation && child.isIntegerConstant()){
 			return new IntegerNode(child.getConstIntVal()*-1);
 		} else {
-			child = child.optimize();
 			return this;
 		}
 	}
@@ -135,7 +135,7 @@ class UnaryNode extends Ast {
 		"(" + child + ")" + type; }
 
 	public void genCode () {
-		child.genCode();
+		child.optimize().genCode();
 		switch(nodeType) {
 			case dereference:
 				System.out.println("dereference " + type); break;
