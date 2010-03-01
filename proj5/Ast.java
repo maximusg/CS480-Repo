@@ -205,13 +205,16 @@ class BinaryNode extends Ast {
 		}else if((this.NodeType == minus) && (!left.isIntegerConstant()) && right.isIntegerConstant()){//t-c
 			UnaryNode nr = (new UnaryNode(UnaryNode.negation,right.type,right));
 			return (new BinaryNode(plus,type,left,nr)).optimize();
-		}else if((this.NodeType == times) && (right.isIntegerConstant()) && (right.getConstIntVal() == 0) && (!(left.isIntegerConstant()))){
+		}else if((this.NodeType == times) && (right.isIntegerConstant()) && (right.getConstIntVal() == 0) && (!(left.isIntegerConstant()))){//t*0
 			return new IntegerNode(new Integer(0));
+		}else if((this.NodeType == times) && (right.isIntegerConstant()) && (right.getConstIntVal() == 1) && (!left.isIntegerConstant())){//t*1
+			return left;
 		}
-		
+
 		if((this.NodeType == times) && (left.isIntegerConstant()) && (right.isIntegerConstant())){
 			return new IntegerNode(new Integer(left.getConstIntVal()) * right.getConstIntVal());
 		}
+
 		return new BinaryNode(NodeType,type,left,right); 
 	}
 	
