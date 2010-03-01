@@ -183,10 +183,20 @@ class BinaryNode extends Ast {
 		if((this.NodeType == plus) && (right.isIntegerConstant()) && (right.getConstIntVal() == 0) ){
 			left.type = this.type;
 			return left;
+		}else if((this.NodeType == plus) && (right.isIntegerConstant()) && (left.isIntegerConstant())){
+			return new IntegerNode(new Integer(left.getConstIntVal() + right.getConstIntVal()));
+		}else if((this.NodeType == plus) && (left.isIntegerConstant()) && !(right.isIntegerConstant())){
+			return new BinaryNode(NodeType,type,right,left);
+		}else if((this.NodeType == plus) && (left.isIntegerConstant())&& (left instanceof BinaryNode)){
+			left = left.optimize();
+			BinaryNode l = (BinaryNode)left;
+			if((l.NodeType == plus) && (!(l.LeftChild.isIntegerConstant())) && (l.RightChild.isIntegerConstant())){
+				return new BinaryNode(NodeType,type,l.LeftChild,new IntegerNode(new Integer(right.getConstIntVal() + l.RightChild.getConstIntVal())));
+			}
 		}
 		
 		return new BinaryNode(NodeType,type,left,right); 
-		}
+	}
 	
 	public String toString() { return "Binary Node " + NodeType +
 		"(" + LeftChild + "," + RightChild + ")" + type; }
