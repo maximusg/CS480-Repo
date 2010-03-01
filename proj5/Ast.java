@@ -180,41 +180,92 @@ class BinaryNode extends Ast {
 		Ast left = LeftChild.optimize();
 		Ast right = RightChild.optimize();
 		
-		if((this.NodeType == plus) && (right.isIntegerConstant()) && (right.getConstIntVal() == 0) ){
+		//t + 0
+		if((this.NodeType == plus) && 
+				(right.isIntegerConstant()) && 
+				(right.getConstIntVal() == 0) ){
 			left.type = this.type;
 			return left;
-		}else if((this.NodeType == plus) && (right.isIntegerConstant()) && (left.isIntegerConstant())){
+		//c + c
+		}else if((this.NodeType == plus) && 
+				(right.isIntegerConstant()) && 
+				(left.isIntegerConstant())){
 			return new IntegerNode(new Integer(left.getConstIntVal() + right.getConstIntVal()));
-		}else if((this.NodeType == plus) && (left.isIntegerConstant()) && !(right.isIntegerConstant())){
+		//c + t
+		}else if((this.NodeType == plus) && 
+				(left.isIntegerConstant()) && 
+				!(right.isIntegerConstant())){
 			return new BinaryNode(NodeType,type,right,left);
-		}else if((this.NodeType == plus) && (left.isIntegerConstant())&& (left instanceof BinaryNode)){//(t+c) + c
+		//(t+c) + c
+		}else if((this.NodeType == plus) && 
+				(left.isIntegerConstant()) && 
+				(left instanceof BinaryNode)){
 			BinaryNode l = (BinaryNode)left;
-			if((l.NodeType == plus) && (!(l.LeftChild.isIntegerConstant())) && (l.RightChild.isIntegerConstant())){
-				return new BinaryNode(NodeType,type,l.LeftChild,new IntegerNode(new Integer(right.getConstIntVal() + l.RightChild.getConstIntVal())));
+			if((l.NodeType == plus) && 
+					(!(l.LeftChild.isIntegerConstant())) && 
+					(l.RightChild.isIntegerConstant())){
+				return new BinaryNode(NodeType,type,
+						l.LeftChild,
+						new IntegerNode(new Integer(right.getConstIntVal() + l.RightChild.getConstIntVal())));
 			}
-		}else if((this.NodeType == plus) && (!right.isIntegerConstant()) && (left instanceof BinaryNode)){//(t+c) + t2
+		//(t+c) + t2
+		}else if((this.NodeType == plus) && 
+				(!right.isIntegerConstant()) && 
+				(left instanceof BinaryNode)){
 			BinaryNode l = (BinaryNode)left;
-			if ((l.NodeType == plus) && (l.RightChild.isIntegerConstant()) && (!l.LeftChild.isIntegerConstant())){
-				return (new BinaryNode(NodeType,type,new BinaryNode(NodeType,type,l.LeftChild,right),l.RightChild)).optimize();
+			if ((l.NodeType == plus) && 
+					(l.RightChild.isIntegerConstant()) && 
+					(!l.LeftChild.isIntegerConstant())){
+				return (new BinaryNode(NodeType,type,
+						new BinaryNode(NodeType,type,l.LeftChild,right),
+						l.RightChild)).optimize();
 			}
-		}else if((this.NodeType == plus) && (!left.isIntegerConstant()) && (right instanceof BinaryNode)){//t+(t2+c)
+		//t+(t2+c)
+		}else if((this.NodeType == plus) && 
+				(!left.isIntegerConstant()) && 
+				(right instanceof BinaryNode)){
 			BinaryNode r = (BinaryNode)right;
-			if ((r.NodeType == plus) && (!(r.LeftChild.isIntegerConstant())) && (r.RightChild.isIntegerConstant())){
-				return (new BinaryNode(NodeType,type,new BinaryNode(NodeType,type,left,r.LeftChild),r.RightChild)).optimize();
+			if ((r.NodeType == plus) && 
+					(!(r.LeftChild.isIntegerConstant())) && 
+					(r.RightChild.isIntegerConstant())){
+				return (new BinaryNode(NodeType,type,
+						new BinaryNode(NodeType,type,left,r.LeftChild),
+						r.RightChild)).optimize();
 			}
-		}else if((this.NodeType == minus) && (!left.isIntegerConstant()) && right.isIntegerConstant()){//t-c
+		//t-c
+		}else if((this.NodeType == minus) && 
+				(!left.isIntegerConstant()) && 
+				right.isIntegerConstant()){
 			UnaryNode nr = (new UnaryNode(UnaryNode.negation,right.type,right));
 			return (new BinaryNode(plus,type,left,nr)).optimize();
-		}else if((this.NodeType == times) && (right.isIntegerConstant()) && (right.getConstIntVal() == 0) && (!(left.isIntegerConstant()))){//t*0
+		//t*0
+		}else if((this.NodeType == times) && 
+				(right.isIntegerConstant()) && 
+				(right.getConstIntVal() == 0) && 
+				(!(left.isIntegerConstant()))){
 			return new IntegerNode(new Integer(0));
-		}else if((this.NodeType == times) && (right.isIntegerConstant()) && (right.getConstIntVal() == 1) && (!left.isIntegerConstant())){//t*1
+		//t*1
+		}else if((this.NodeType == times) && 
+				(right.isIntegerConstant()) && 
+				(right.getConstIntVal() == 1) && 
+				(!left.isIntegerConstant())){
 			return left;
-		}else if((this.NodeType == times) && (left.isIntegerConstant()) && (right.isIntegerConstant())){//c*c
+		//c*c
+		}else if((this.NodeType == times) && 
+				(left.isIntegerConstant()) && 
+				(right.isIntegerConstant())){
 			return new IntegerNode(new Integer(left.getConstIntVal()) * right.getConstIntVal());
-		}else if((this.NodeType == times) && (right.isIntegerConstant()) && (left instanceof BinaryNode)){//(t+c1)*c2
+		//(t+c1)*c2
+		}else if((this.NodeType == times) && 
+				(right.isIntegerConstant()) && 
+				(left instanceof BinaryNode)){
 			BinaryNode l = (BinaryNode)left;
-			if((!l.LeftChild.isIntegerConstant()) && (l.RightChild.isIntegerConstant()) && (l.NodeType == plus)){
-				return (new BinaryNode(plus,type,new BinaryNode(times,type,l.LeftChild, right),new BinaryNode(times,type,l.RightChild,right))).optimize();
+			if((!l.LeftChild.isIntegerConstant()) && 
+					(l.RightChild.isIntegerConstant()) && 
+					(l.NodeType == plus)){
+				return (new BinaryNode(plus,type,
+						new BinaryNode(times,type,l.LeftChild, right),
+						new BinaryNode(times,type,l.RightChild,right))).optimize();
 			}
 		}
 
