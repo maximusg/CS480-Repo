@@ -233,6 +233,11 @@ class FunctionCallNode extends Ast {
 	protected Vector args;
 	
 	public Ast optimize() {
+		Vector rgs = new Vector();
+		for(int i = 0; i < args.capacity(); i++){
+			rgs.add(((Ast)args.elementAt(i)).optimize());
+		}
+		args = rgs;
 		return this;
 	}
 
