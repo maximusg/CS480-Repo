@@ -187,15 +187,20 @@ class BinaryNode extends Ast {
 			return new IntegerNode(new Integer(left.getConstIntVal() + right.getConstIntVal()));
 		}else if((this.NodeType == plus) && (left.isIntegerConstant()) && !(right.isIntegerConstant())){
 			return new BinaryNode(NodeType,type,right,left);
-		}else if((this.NodeType == plus) && (left.isIntegerConstant())&& (left instanceof BinaryNode)){
+		}else if((this.NodeType == plus) && (left.isIntegerConstant())&& (left instanceof BinaryNode)){//(t+c) + c
 			BinaryNode l = (BinaryNode)left;
 			if((l.NodeType == plus) && (!(l.LeftChild.isIntegerConstant())) && (l.RightChild.isIntegerConstant())){
 				return new BinaryNode(NodeType,type,l.LeftChild,new IntegerNode(new Integer(right.getConstIntVal() + l.RightChild.getConstIntVal())));
 			}
-		}else if((this.NodeType == plus) && (!right.isIntegerConstant()) && (left instanceof BinaryNode)){
+		}else if((this.NodeType == plus) && (!right.isIntegerConstant()) && (left instanceof BinaryNode)){//(t+c) + t2
 			BinaryNode l = (BinaryNode)left;
 			if ((l.NodeType == plus) && (l.RightChild.isIntegerConstant()) && (!l.LeftChild.isIntegerConstant())){
 				return new BinaryNode(NodeType,type,new BinaryNode(NodeType,type,l.LeftChild,right),l.RightChild);
+			}
+		}else if((this.NodeType == plus) && (!left.isIntegerConstant()) && (right instanceof BinaryNode)){//t+(t2+c)
+			BinaryNode r = (BinaryNode)right;
+			if ((r.NodeType == plus) && (!(r.LeftChild.isIntegerConstant())) && (r.RightChild.isIntegerConstant())){
+				return new BinaryNode(NodeType,type,new BinaryNode(NodeType,type,left,r.LeftChild),r.RightChild);
 			}
 		}
 		
