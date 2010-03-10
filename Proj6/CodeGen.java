@@ -24,7 +24,7 @@ class CodeGen {
 		System.out.println(name + ":");
 		gen("pushl", "%ebp");
 		gen("movl",	"%esp", "%ebp");
-		if size != 0{
+		if (size != 0){
 			String sizeString = String.valueOf(size);
 			gen("subl", "$" + sizeString, "%esp");
 		}
