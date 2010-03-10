@@ -298,7 +298,15 @@ class BinaryNode extends Ast {
 				}
 				break;
 			case leftShift: 
-				System.out.println("do left shift " + type); break;
+				if (RightChild.isInteger() && LeftChild.isInteger()){
+					RightChild.genCode();
+					LeftChild.genCode();
+					CodeGen.gen("popl", "%eax");
+					CodeGen.gen("popl", "%ecx");
+					CodeGen.gen("sall",	"%cl", "%eax");
+					CodeGen.gen("pushl", "%eax");
+				}
+				break;
 			case times: 
 				if (this.type == PrimitiveType.RealType){
 					RightChild.genCode();
