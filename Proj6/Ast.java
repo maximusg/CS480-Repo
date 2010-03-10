@@ -298,14 +298,12 @@ class BinaryNode extends Ast {
 				}
 				break;
 			case leftShift: 
-				if (RightChild.isInteger() && LeftChild.isInteger()){
-					RightChild.genCode();
-					LeftChild.genCode();
-					CodeGen.gen("popl", "%eax");
-					CodeGen.gen("popl", "%ecx");
-					CodeGen.gen("sall",	"%cl", "%eax");
-					CodeGen.gen("pushl", "%eax");
-				}
+				RightChild.genCode();
+				LeftChild.genCode();
+				CodeGen.gen("popl", "%eax");
+				CodeGen.gen("popl", "%ecx");
+				CodeGen.gen("sall",	"%cl", "%eax");
+				CodeGen.gen("pushl", "%eax");
 				break;
 			case times: 
 				if (this.type == PrimitiveType.RealType){
@@ -342,18 +340,18 @@ class BinaryNode extends Ast {
 				}
 				break;
 			case remainder:
-				if (this.type == PrimitiveType.IntegerType){
-					RightChild.genCode();
-					LeftChild.genCode();
-					CodeGen.gen("popl",	"%eax");
-					CodeGen.gen("popl",	"%ecx");
-					CodeGen.gen("cltd");
-					CodeGen.gen("idivl", "%ecx");
-					CodeGen.gen("pushl", "%edx");
-				}
+				RightChild.genCode();
+				LeftChild.genCode();
+				CodeGen.gen("popl",	"%eax");
+				CodeGen.gen("popl",	"%ecx");
+				CodeGen.gen("cltd");
+				CodeGen.gen("idivl", "%ecx");
+				CodeGen.gen("pushl", "%edx");
 				break;
 			case and: 
-				System.out.println("do and " + type); break;
+				//This is where I stopped
+				
+				break;
 			case or: 
 				System.out.println("do or " + type); break;
 			case less: 
