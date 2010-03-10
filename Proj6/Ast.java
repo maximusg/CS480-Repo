@@ -260,11 +260,28 @@ class BinaryNode extends Ast {
 	}
 
 	public void genCode () {
-		LeftChild.genCode();
-		RightChild.genCode();
+		//LeftChild.genCode();
+		//RightChild.genCode();
 		switch (NodeType) {
-			case plus: 
-				System.out.println("do addition " + type); break;
+			case plus:
+				if (this.type == PrimitiveType.RealType){
+					RightChild.genCode();
+					LeftChild.genCode();
+					CodeGen.gen("flds",	"0(%esp)");
+					CodeGen.gen("addl",	"$4", "%esp");
+					CodeGen.gen("fadds", "0(%esp)");
+					CodeGen.gen("fstps", "0(%esp)");
+				} else if (this.type == PrimitiveType.IntegerType){
+					LeftChild.genCode();
+					if (RightChild.isInteger()){
+						CodeGen.gen("addl",	"$n", "0(%esp)");
+					} else {
+						RightChild.genCode();
+						CodeGen.gen("popl",	"%eax");
+						CodeGen.gen("addl",	"%eax", "0(%esp)");
+					}
+				}
+				break;
 			case minus: 
 				System.out.println("do subtraction " + type); break;
 			case leftShift: 
