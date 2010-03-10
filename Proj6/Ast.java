@@ -316,9 +316,34 @@ class BinaryNode extends Ast {
 				}
 				break;
 			case divide: 
-				System.out.println("do division " + type); break;
+				if (this.type == PrimitiveType.RealType){
+					RightChild.genCode();
+					LeftChild.genCode();
+					CodeGen.gen("flds",	"0(%esp)");
+					CodeGen.gen("addl",	"$4", "%esp");
+					CodeGen.gen("fdivs", "0(%esp)");
+					CodeGen.gen("fstps", "0(%esp)");
+				} else {
+					RightChild.genCode();
+					LeftChild.genCode();
+					CodeGen.gen("popl",	"%eax");
+					CodeGen.gen("popl",	"%ecx");
+					CodeGen.gen("cltd");
+					CodeGen.gen("idivl", "%ecx");
+					CodeGen.gen("pushl", "%eax");
+				}
+				break;
 			case remainder:
-				System.out.println("do remainder " + type); break;
+				if (this.type == PrimitiveType.IntegerType){
+					RightChild.genCode();
+					LeftChild.genCode();
+					CodeGen.gen("popl",	"%eax");
+					CodeGen.gen("popl",	"%ecx");
+					CodeGen.gen("cltd");
+					CodeGen.gen("idivl", "%ecx");
+					CodeGen.gen("pushl", "%edx");
+				}
+				break;
 			case and: 
 				System.out.println("do and " + type); break;
 			case or: 
