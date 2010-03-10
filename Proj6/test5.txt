@@ -1,0 +1,14 @@
+function main ()
+var x : int;
+var y : int;
+begin
+	x = 10;
+	y = 3;
+	printInt(x+y);
+	printInt(x-y);
+	printInt(x*y);
+	printInt(x/y);
+	printInt(x%y);
+	printInt(x<<y);
+end;
+

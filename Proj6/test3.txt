@@ -1,0 +1,28 @@
+function isqrt (r : int) : int
+var low : int;
+var high : int;
+var mid : int;
+begin
+	printStr("starting");
+	low = 0;
+	high = r;
+	while (high > low + 1) 
+	begin
+		printStr("values");
+		mid = (low + high) / 2;
+		printInt(low);
+		printInt(mid);
+		printInt(high);
+		if ((mid * mid) > r) 
+			high = mid
+		else
+			low = mid;
+	end;
+	printStr("returning");
+	return (low);
+end;
+
+function main ()
+begin
+	printInt(isqrt(10820));
+end;
