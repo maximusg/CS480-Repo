@@ -55,15 +55,43 @@ class CodeGen {
 
 	static void genAssign (Ast left, Ast right) {
 		// put your code here
-		System.out.println("replace me with your code");
+		if(left instanceof BinaryNode){//Check that the whole thing works
+			if(((BinaryNode)left).LeftChild instanceof FramePointer){
+				if(((BinaryNode)left).RightChild.isInteger()){
+					if(((BinaryNode)left).NodeType == BinaryNode.plus){
+						if (right.type == PrimitiveType.RealType){
+							gen("flds","0(%esp)");
+							gen("addl",	"$4","%esp");
+							gen("fstps",((BinaryNode)left).RightChild.cValue()+"(%ebp)");
+						}
+						else{
+							gen("popl",	((BinaryNode)left).RightChild.cValue()+"(%ebp)");
+						}
+					}
+				}
+			}
+		}
+		if(left instanceof GlobalNode ){
+			 right.genCode();
+			 gen("popl", "%eax");
+			 gen("movl", "%eax", ((GlobalNode)(left)).name);
+		}
 	}
 
 	static void genReturn (Ast e) {
 		// put your code here
 		if (e != null) {
 			e.genCode();
-			System.out.println("replace me with your code");
+			if(e.type == PrimitiveType.RealType){
+				gen("fld","0(%esp)");
+				gen("addl","$4,%esp");
+			}
+			else{
+				gen("popl",	"%eax");
+			}	
+			
 		}
+		
 		endLabel.genBranch();
 	}
 }
