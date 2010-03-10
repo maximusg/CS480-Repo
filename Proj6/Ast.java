@@ -300,21 +300,98 @@ class BinaryNode extends Ast {
 	}
 
 	public void genCode () {
-		LeftChild.genCode();
-		RightChild.genCode();
+		//LeftChild.genCode();
+		//RightChild.genCode();
 		switch (NodeType) {
-			case plus: 
-				System.out.println("do addition " + type); break;
+			case plus:
+				if (this.type == PrimitiveType.RealType){
+					RightChild.genCode();
+					LeftChild.genCode();
+					CodeGen.gen("flds",	"0(%esp)");
+					CodeGen.gen("addl",	"$4", "%esp");
+					CodeGen.gen("fadds", "0(%esp)");
+					CodeGen.gen("fstps", "0(%esp)");
+				} else if (this.type == PrimitiveType.IntegerType){
+					LeftChild.genCode();
+					if (RightChild.isInteger()){
+						CodeGen.gen("addl",	"$n", "0(%esp)");
+					} else {
+						RightChild.genCode();
+						CodeGen.gen("popl",	"%eax");
+						CodeGen.gen("addl",	"%eax", "0(%esp)");
+					}
+				}
+				break;
 			case minus: 
-				System.out.println("do subtraction " + type); break;
+				if (this.type == PrimitiveType.RealType){
+					RightChild.genCode();
+					LeftChild.genCode();
+					CodeGen.gen("flds",	"0(%esp)");
+					CodeGen.gen("addl",	"$4", "%esp");
+					CodeGen.gen("fsubs", "0(%esp)");
+					CodeGen.gen("fstps", "0(%esp)");
+				} else {
+					LeftChild.genCode();
+					RightChild.genCode();
+					CodeGen.gen("popl",	"%eax");
+					CodeGen.gen("subl",	"%eax", "0(%esp)");
+				}
+				break;
 			case leftShift: 
-				System.out.println("do left shift " + type); break;
+				if (RightChild.isInteger() && LeftChild.isInteger()){
+					RightChild.genCode();
+					LeftChild.genCode();
+					CodeGen.gen("popl", "%eax");
+					CodeGen.gen("popl", "%ecx");
+					CodeGen.gen("sall",	"%cl", "%eax");
+					CodeGen.gen("pushl", "%eax");
+				}
+				break;
 			case times: 
-				System.out.println("do multiplication " + type); break;
+				if (this.type == PrimitiveType.RealType){
+					RightChild.genCode();
+					LeftChild.genCode();
+					CodeGen.gen("flds",	"0(%esp)");
+					CodeGen.gen("addl",	"$4", "%esp");
+					CodeGen.gen("fmuls", "0(%esp)");
+					CodeGen.gen("fstps", "0(%esp)");
+				} else {
+					LeftChild.genCode();
+					RightChild.genCode();
+					CodeGen.gen("popl",	"%eax");
+					CodeGen.gen("imull", "0(%esp)");
+					CodeGen.gen("movl",	"%eax", "0(%esp)");
+				}
+				break;
 			case divide: 
-				System.out.println("do division " + type); break;
+				if (this.type == PrimitiveType.RealType){
+					RightChild.genCode();
+					LeftChild.genCode();
+					CodeGen.gen("flds",	"0(%esp)");
+					CodeGen.gen("addl",	"$4", "%esp");
+					CodeGen.gen("fdivs", "0(%esp)");
+					CodeGen.gen("fstps", "0(%esp)");
+				} else {
+					RightChild.genCode();
+					LeftChild.genCode();
+					CodeGen.gen("popl",	"%eax");
+					CodeGen.gen("popl",	"%ecx");
+					CodeGen.gen("cltd");
+					CodeGen.gen("idivl", "%ecx");
+					CodeGen.gen("pushl", "%eax");
+				}
+				break;
 			case remainder:
-				System.out.println("do remainder " + type); break;
+				if (this.type == PrimitiveType.IntegerType){
+					RightChild.genCode();
+					LeftChild.genCode();
+					CodeGen.gen("popl",	"%eax");
+					CodeGen.gen("popl",	"%ecx");
+					CodeGen.gen("cltd");
+					CodeGen.gen("idivl", "%ecx");
+					CodeGen.gen("pushl", "%edx");
+				}
+				break;
 			case and: 
 				System.out.println("do and " + type); break;
 			case or: 
