@@ -19,9 +19,16 @@ class CodeGen {
 	static private Vector constantTable;
 
 	static void genProlog (String name, int size) {
-		// put your code here
-		System.out.println("replace me with your code");
-		// end of your code
+		gen(".globl", name);
+		gen(".type", name, "@function");
+		System.out.println(name + ":");
+		gen("pushl", "%ebp");
+		gen("movl",	"%esp", "%ebp");
+		if size != 0{
+			String sizeString = String.valueOf(size);
+			gen("subl", "$" + sizeString, "%esp");
+		}
+		
 		endLabel = new Label();
 		constantTable = new Vector();
 		stringLabel = new Vector();
@@ -49,7 +56,9 @@ class CodeGen {
 		}
 
 	static void genGlobal (String name, int size) {
-		// put your code here
+		String sizeString = String.valueOf(size);
+		gen(".comm", name, sizeString);
+		
 		System.out.println("replace me with your code");
 		}
 
