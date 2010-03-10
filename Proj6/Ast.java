@@ -93,7 +93,7 @@ class FramePointer extends Ast {
 	public FramePointer () { super(PrimitiveType.VoidType); }
 
 	public void genCode () {
-		System.out.println("frame pointer");
+		CodeGen.gen("pushl","%ebp");
 		}
 
 	public String toString() { return "frame pointer"; }
@@ -112,7 +112,18 @@ class UnaryNode extends Ast {
 		nodeType = nt;
 		child = b;
 	}
-
+	public void branchIfTrue (Label lab) throws ParseException {
+		if(this.type.equals(UnaryNode.negation)){
+			this.child.branchIfFalse(lab);
+		}
+		genCode();
+	}
+	public void branchIfFalse (Label lab) throws ParseException { 
+		if(this.type.equals(UnaryNode.negation)){
+			this.child.branchIfTrue(lab);
+		}		
+		genCode();
+	}
 	public int nodeType;
 	public Ast child;
 
@@ -127,18 +138,47 @@ class UnaryNode extends Ast {
 		}
 
 	public void genCode () {
-		child.genCode();
+		
 		switch(nodeType) {
 			case dereference:
-				System.out.println("dereference " + type); break;
+				if(child instanceof BinaryNode){
+					if(((BinaryNode)child).NodeType == (BinaryNode.plus)){
+						if(((((BinaryNode)child).LeftChild instanceof FramePointer) && (((BinaryNode)child).RightChild.isInteger()))||((((BinaryNode)child).RightChild instanceof FramePointer) && (((BinaryNode)child).LeftChild.isInteger()))){
+							CodeGen.gen("pushl","offset(%ebp)");
+						}
+					}
+				}
+				if(child instanceof GlobalNode){
+					CodeGen.gen("pushl","name");
+				}
 			case convertToReal:
-				System.out.println("convert to real" + type); break;
+				child.genCode();
+				CodeGen.gen("fildl","0(%esp)");
+				CodeGen.gen("fstps","0(%esp)");
+				break;
 			case notOp:
 				System.out.println("not op " + type); break;
 			case negation:
-				System.out.println("numeric negation " + type); break;
+				if(child instanceof IntegerNode){
+						child.genCode();
+						CodeGen.gen("negl","0(%esp)");
+				}else if(child instanceof RealNode){
+					child.genCode();
+					CodeGen.gen("flds","0(%esp)");
+					CodeGen.gen("fchs");
+					CodeGen.gen("fstps","0(%esp)");
+				}
+				break;
 			case newOp:
-				System.out.println("new memory " + type); break;
+				child.genCode();
+				CodeGen.gen("call","malloc");	
+				CodeGen.gen("addl","$4","%esp");
+				CodeGen.gen("pushl","%eax");
+				break;
+			default:
+				child.genCode();
+				CodeGen.gen("popl","%eax");
+				CodeGen.gen("pushl","0(%eax)");
 		}
 	}
 }
