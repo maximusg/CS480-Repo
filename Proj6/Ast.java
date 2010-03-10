@@ -300,7 +300,21 @@ class BinaryNode extends Ast {
 			case leftShift: 
 				System.out.println("do left shift " + type); break;
 			case times: 
-				System.out.println("do multiplication " + type); break;
+				if (this.type == PrimitiveType.RealType){
+					RightChild.genCode();
+					LeftChild.genCode();
+					CodeGen.gen("flds",	"0(%esp)");
+					CodeGen.gen("addl",	"$4", "%esp");
+					CodeGen.gen("fmuls", "0(%esp)");
+					CodeGen.gen("fstps", "0(%esp)");
+				} else {
+					LeftChild.genCode();
+					RightChild.genCode();
+					CodeGen.gen("popl",	"%eax");
+					CodeGen.gen("imull", "0(%esp)");
+					CodeGen.gen("movl",	"%eax", "0(%esp)");
+				}
+				break;
 			case divide: 
 				System.out.println("do division " + type); break;
 			case remainder:
