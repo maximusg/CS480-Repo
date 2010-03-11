@@ -38,7 +38,7 @@ class GlobalNode extends Ast {
 	public String toString() { return "global node " + name; }
 
 	public void genCode() {
-		System.out.println("Global " + name + " " + type);
+		CodeGen.gen("pushl", "$" + name);
 		}
 }
 
@@ -53,7 +53,7 @@ class IntegerNode extends Ast {
 	public String toString() { return "Integer " + val; }
 
 	public void genCode() {
-		System.out.println("Integer " + val);
+		CodeGen.gen("pushl", "$" + val);
 		}
 
 	public boolean isInteger() { return true; }
@@ -72,7 +72,11 @@ class RealNode extends Ast {
 	public String toString() { return "real " + val; }
 
 	public void genCode() {
-		System.out.println("Real " + val);
+		Label lab = new Label();
+		CodeGen.addConstant(lab, new Double(val));
+		CodeGen.gen("flds",	lab.toString());
+		CodeGen.gen("subl",	"$4", "%esp");
+		CodeGen.gen("fstps", "0(%esp)");
 		}
 }
 
@@ -85,7 +89,9 @@ class StringNode extends Ast {
 	public String toString() { return "string " + val; }
 
 	public void genCode() {
-		System.out.println("String " + val); 
+		Label lab = new Label();
+		CodeGen.addConstant(lab, val);
+		CodeGen.gen("pushl", "$.L" + lab.toString()); 
 		}
 }
 
