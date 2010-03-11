@@ -91,7 +91,7 @@ class StringNode extends Ast {
 	public void genCode() {
 		Label lab = new Label();
 		CodeGen.addConstant(lab, val);
-		CodeGen.gen("pushl", "$.L" + lab.toString()); 
+		CodeGen.gen("pushl", "$" + lab.toString()); 
 		}
 }
 
@@ -150,13 +150,17 @@ class UnaryNode extends Ast {
 				if(child instanceof BinaryNode){
 					if(((BinaryNode)child).NodeType == (BinaryNode.plus)){
 						if(((((BinaryNode)child).LeftChild instanceof FramePointer) && (((BinaryNode)child).RightChild.isInteger()))||((((BinaryNode)child).RightChild instanceof FramePointer) && (((BinaryNode)child).LeftChild.isInteger()))){
-							CodeGen.gen("pushl","offset(%ebp)");
+							CodeGen.gen("pushl",((BinaryNode)child).RightChild.cValue() + "(%ebp)");
+						}else if(child instanceof GlobalNode){
+							CodeGen.gen("pushl","name");
+						}else{
+							child.genCode();
+							CodeGen.gen("popl","%eax");
+							CodeGen.gen("pushl","0(%eax)");
 						}
 					}
 				}
-				if(child instanceof GlobalNode){
-					CodeGen.gen("pushl","name");
-				}
+				break;
 			case convertToReal:
 				child.genCode();
 				CodeGen.gen("fildl","0(%esp)");
@@ -320,7 +324,7 @@ class BinaryNode extends Ast {
 				} else if (this.type == PrimitiveType.IntegerType){
 					LeftChild.genCode();
 					if (RightChild.isInteger()){
-						CodeGen.gen("addl",	"$n", "0(%esp)");
+						CodeGen.gen("addl",	"$" + RightChild.cValue(), "0(%esp)");
 					} else {
 						RightChild.genCode();
 						CodeGen.gen("popl",	"%eax");
@@ -524,7 +528,7 @@ class FunctionCallNode extends Ast {
 				CodeGen.gen("addl", "$" + size, "%esp");
 			}
 			
-			if (fun.type == PrimitiveType.VoidType){
+			if (((FunctionType)fun.type).returnType != PrimitiveType.VoidType){
 				if (fun.type == PrimitiveType.RealType){
 					CodeGen.gen("subl", "$4", "%esp");
 					CodeGen.gen("fstps", "0(%esp)");

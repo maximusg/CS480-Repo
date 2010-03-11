@@ -63,7 +63,7 @@ class CodeGen {
 		}
 
 	static void genAssign (Ast left, Ast right) {
-		// put your code here
+		right.genCode();
 		if(left instanceof BinaryNode){//Check that the whole thing works
 			if(((BinaryNode)left).LeftChild instanceof FramePointer){
 				if(((BinaryNode)left).RightChild.isInteger()){
@@ -81,7 +81,6 @@ class CodeGen {
 			}
 		}
 		if(left instanceof GlobalNode ){
-			 right.genCode();
 			 gen("popl", "%eax");
 			 gen("movl", "%eax", ((GlobalNode)(left)).name);
 		}
