@@ -1,4 +1,0 @@
-function main ( ) 
-begin
-	printStr("hello world!");
-end;

@@ -1,4 +1,0 @@
-function main ()
-begin
-	printInt(20-3);
-end;

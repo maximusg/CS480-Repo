@@ -1,6 +1,6 @@
 #! /bin/sh
 
-for i in 1 2 3 4 5 9 10 n
+for i in 1 2 3 4 5 9
 do
 	echo "Testing $i"
 	echo
