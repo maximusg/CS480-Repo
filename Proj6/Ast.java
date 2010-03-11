@@ -147,18 +147,22 @@ class UnaryNode extends Ast {
 		
 		switch(nodeType) {
 			case dereference:
+				int i = 0;
 				if(child instanceof BinaryNode){
 					if(((BinaryNode)child).NodeType == (BinaryNode.plus)){
 						if(((((BinaryNode)child).LeftChild instanceof FramePointer) && (((BinaryNode)child).RightChild.isInteger()))||((((BinaryNode)child).RightChild instanceof FramePointer) && (((BinaryNode)child).LeftChild.isInteger()))){
 							CodeGen.gen("pushl",((BinaryNode)child).RightChild.cValue() + "(%ebp)");
-						}else if(child instanceof GlobalNode){
-							CodeGen.gen("pushl","name");
-						}else{
-							child.genCode();
-							CodeGen.gen("popl","%eax");
-							CodeGen.gen("pushl","0(%eax)");
+							i = 1;
 						}
 					}
+				}else if(child instanceof GlobalNode){
+					CodeGen.gen("pushl","name");
+					i = 1;
+				}
+				if (i == 0){
+					child.genCode();
+					CodeGen.gen("popl","%eax");
+					CodeGen.gen("pushl","0(%eax)");
 				}
 				break;
 			case convertToReal:
@@ -321,7 +325,7 @@ class BinaryNode extends Ast {
 					CodeGen.gen("addl",	"$4", "%esp");
 					CodeGen.gen("fadds", "0(%esp)");
 					CodeGen.gen("fstps", "0(%esp)");
-				} else if (this.type == PrimitiveType.IntegerType){
+				} else {
 					LeftChild.genCode();
 					if (RightChild.isInteger()){
 						CodeGen.gen("addl",	"$" + RightChild.cValue(), "0(%esp)");
