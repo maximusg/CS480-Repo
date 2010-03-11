@@ -63,11 +63,12 @@ class CodeGen {
 		}
 
 	static void genAssign (Ast left, Ast right) {
-		right.genCode();
+		
 		if(left instanceof BinaryNode){//Check that the whole thing works
 			if(((BinaryNode)left).LeftChild instanceof FramePointer){
 				if(((BinaryNode)left).RightChild.isInteger()){
 					if(((BinaryNode)left).NodeType == BinaryNode.plus){
+						right.genCode();
 						if (right.type == PrimitiveType.RealType){
 							gen("flds","0(%esp)");
 							gen("addl",	"$4","%esp");
@@ -79,12 +80,11 @@ class CodeGen {
 					}
 				}
 			}
-		}
-		if(left instanceof GlobalNode ){
-			 gen("popl", "%eax");
-			 gen("movl", "%eax", ((GlobalNode)(left)).name);
-		}
-		if(!(left instanceof GlobalNode) && !(left instanceof BinaryNode)){
+		} else if(left instanceof GlobalNode ){
+			right.genCode();
+			gen("popl", "%eax");
+			gen("movl", "%eax", ((GlobalNode)(left)).name);
+		} else {
 				left.genCode();
 				right.genCode();
 				if(left.type == PrimitiveType.RealType){
