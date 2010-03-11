@@ -443,13 +443,30 @@ class FunctionCallNode extends Ast {
 
 	public void genCode () {
 		int i = args.size();
+		int size = 0;
 		while (--i >= 0) {
 			Ast arg = (Ast) args.elementAt(i);
 			arg.genCode();
-			System.out.println("push argument " + arg.type);
+			size = size + arg.type.size();
+		}
+		
+		if (fun instanceof GlobalNode){
+			CodeGen.gen("call", ((GlobalNode)fun).name);
+			
+			if (size != 0){
+				CodeGen.gen("addl", "$" + size, "%esp");
 			}
-
-		fun.genCode();
-		System.out.println("function call " + type);
+			
+			if (fun.type != null){
+				if (fun.type == PrimitiveType.RealType){
+					CodeGen.gen("subl", "$4", "%esp");
+					CodeGen.gen("fstps", "0(%esp)");
+				} else {
+					CodeGen.gen("pushl", "%eax");
+				}
+			}
+		}
+		
+		//fun.genCode();
 	}
 }
