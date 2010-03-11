@@ -85,6 +85,21 @@ class CodeGen {
 			 gen("popl", "%eax");
 			 gen("movl", "%eax", ((GlobalNode)(left)).name);
 		}
+		if(!(left instanceof GlobalNode) && !(left instanceof BinaryNode)){
+				left.genCode();
+				right.genCode();
+				if(left.type == PrimitiveType.RealType){
+					gen("flds","0(%esp)");
+					gen("addl","$4","%esp");
+					gen("popl","%ecx");
+					gen("fstps","0(%ecx)");
+				}
+				else{
+					gen("popl",	"%eax");
+					gen("popl"	,"%ecx");
+					gen("movl",	"%eax","0(%ecx)");
+				}
+		}
 	}
 
 	static void genReturn (Ast e) {
