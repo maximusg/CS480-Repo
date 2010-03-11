@@ -89,7 +89,9 @@ class StringNode extends Ast {
 	public String toString() { return "string " + val; }
 
 	public void genCode() {
-		System.out.println("String " + val); 
+		Label lab = new Label();
+		CodeGen.addConstant(lab, val);
+		CodeGen.gen("pushl", "$.L" + lab.toString()); 
 		}
 }
 
