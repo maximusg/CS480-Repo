@@ -165,10 +165,10 @@ class UnaryNode extends Ast {
 			case notOp:
 				System.out.println("not op " + type); break;
 			case negation:
-				if(child instanceof IntegerNode){
+				if(child.type == PrimitiveType.IntegerType){
 						child.genCode();
 						CodeGen.gen("negl","0(%esp)");
-				}else if(child instanceof RealNode){
+				}else if(child.type == PrimitiveType.RealType){
 					child.genCode();
 					CodeGen.gen("flds","0(%esp)");
 					CodeGen.gen("fchs");
