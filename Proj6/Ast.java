@@ -524,7 +524,7 @@ class FunctionCallNode extends Ast {
 				CodeGen.gen("addl", "$" + size, "%esp");
 			}
 			
-			if (fun.type != null){
+			if (fun.type == PrimitiveType.VoidType){
 				if (fun.type == PrimitiveType.RealType){
 					CodeGen.gen("subl", "$4", "%esp");
 					CodeGen.gen("fstps", "0(%esp)");
