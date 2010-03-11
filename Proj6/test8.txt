@@ -1,0 +1,37 @@
+class complex
+begin
+var real : int;
+var imag : int;
+end;
+
+function cadd (a : ^ complex, b : ^ complex, c : ^ complex)
+begin
+	c^.real = a^.real + b^.real;
+	c^.imag = a^.imag + b^.imag;
+end;
+
+function cmult (a : ^ complex, b : ^ complex, c : ^ complex)
+begin
+	c^.real = a^.real * b^.real - a^.imag * b^.imag;
+	c^.imag = a^.real * b^.imag + a^.imag * b^.real;
+end;
+
+function main ()
+var x : complex;
+var y : complex;
+var z : complex;
+begin
+	x.real = 3;
+	x.imag = 4;
+	y.real = 6;
+	y.imag = 3;
+	printStr("addition test");
+	cadd(&x, &y, &z);
+	printInt(z.real);
+	printInt(z.imag);
+	printStr("multiplication test");
+	cmult(&x, &y, &z);
+	printInt(z.real);
+	printInt(z.imag);
+end;
+

@@ -1,0 +1,8 @@
+function main()
+var a : ^ [2 : 5] int;
+begin
+    a = new [2 : 5] int;
+    a^[3] = 7;
+    printInt(a^[3]);
+end;
+

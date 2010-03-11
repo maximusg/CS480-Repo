@@ -1,0 +1,9 @@
+function main ()
+var a : int;
+var b : int;
+begin
+	a = 101;
+	a = a / 2;
+	printInt(a);
+end;
+

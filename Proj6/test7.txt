@@ -1,0 +1,10 @@
+function main ()
+var i : int;
+var r : real;
+begin
+	i = 4;
+	printInt(-i);
+	r = 3.2 + i;
+	printReal(-r);
+end;
+
