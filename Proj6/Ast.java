@@ -394,27 +394,94 @@ class BinaryNode extends Ast {
 				CodeGen.gen("idivl", "%ecx");
 				CodeGen.gen("pushl", "%edx");
 				break;
+		}
+	}
+	private void compHelper(){
+		this.LeftChild.genCode();
+		this.RightChild.genCode();
+		CodeGen.gen("popl", "%eax");
+		CodeGen.gen("popl", "%ecx");
+		CodeGen.gen("cmpl", "%eax", "%ecx");
+	}
+	private void genComp(String branch, Label l){
+		CodeGen.gen(branch, l.toString());
+	}
+	public void branchIfTrue(Label lab) throws ParseException {
+		switch(this.NodeType){
 			case and: 
-				//This is where I stopped
-				
+				Label l2 = new Label();
+				this.LeftChild.branchIfFalse(l2);
+				this.RightChild.branchIfTrue(lab);
+				l2.genCode();
 				break;
 			case or: 
-				System.out.println("do or " + type); break;
+				this.LeftChild.branchIfTrue(lab);
+				this.RightChild.branchIfTrue(lab);
+				break;
 			case less: 
-				System.out.println("compare less " + type); break;
-			case lessEqual: 
-				System.out.println("compare less or equal" + type); break;
+				compHelper();
+				genComp("jl", lab);
+				break;
+			case lessEqual:
+				compHelper();
+				genComp("jle", lab);
+				break;
 			case equal: 
-				System.out.println("compare equal " + type); break;
-			case notEqual: 
-				System.out.println("compare notEqual " + type); break;
+				compHelper();
+				genComp("je", lab);
+				break;
+			case notEqual:
+				compHelper();
+				genComp("jne", lab);
+				break;
 			case greater: 
-				System.out.println("compare greater " + type); break;
+				compHelper();
+				genComp("jg", lab);
+				break;
 			case greaterEqual: 
-				System.out.println("compare greaterEqual " + type); break;
-			}
+				compHelper();
+				genComp("jge", lab);
+				break;
 		}
-
+	}
+	public void branchIfFalse(Label lab) throws ParseException {
+		switch(this.NodeType){
+			case and: 
+				Label l2 = new Label();
+				this.LeftChild.branchIfTrue(l2);
+				this.RightChild.branchIfFalse(lab);
+				l2.genCode();
+				break;
+			case or: 
+				this.LeftChild.branchIfFalse(lab);
+				this.RightChild.branchIfFalse(lab);
+				break;
+			case less: 
+				compHelper();
+				genComp("jge", lab);
+				break;
+			case lessEqual:
+				compHelper();
+				genComp("jg", lab);
+				break;
+			case equal: 
+				compHelper();
+				genComp("jne", lab);
+				break;
+			case notEqual:
+				compHelper();
+				genComp("je", lab);
+				break;
+			case greater: 
+				compHelper();
+				genComp("jle", lab);
+				break;
+			case greaterEqual: 
+				compHelper();
+				genComp("jl", lab);
+				break;
+		}
+	}
 	public int NodeType;
 	public Ast LeftChild;
 	public Ast RightChild;
